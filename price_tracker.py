@@ -1,5 +1,6 @@
 import requests
 import time
+from params import outlier_param, intervals
 
 def getPrices():
     url = 'https://api.binance.com/api/v3/ticker/price'
@@ -8,7 +9,6 @@ def getPrices():
 
 data = getPrices()
 full_data = []
-intervals = ['1s', '5s', '15s', '30s', '1m','15m']
 pairs_of_interest = ['USDT','BTC']
 
 # Initialize full_data
@@ -29,9 +29,6 @@ def searchSymbol(symbol_name):
 def getPercentageChange(asset_dict):
 
     data_length = len(asset_dict['price'])
-
-    intervals = ['1s', '5s', '15s', '30s', '1m','15m']
-    outlier_param = {'1s':0.01,'5s':0.03,'15s':0.05,'30s':0.06,'1m':0.07,'15m':0.10}
 
     for inter in intervals:
         unit = inter[-1]
