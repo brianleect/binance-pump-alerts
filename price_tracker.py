@@ -31,6 +31,7 @@ def getPercentageChange(asset_dict):
     data_length = len(asset_dict['price'])
 
     intervals = ['1s', '5s', '15s', '30s', '1m','15m']
+    outlier_param = {'1s':0.01,'5s':0.01,'15s':0.01,'30s':0.01,'1m':0.01,'15m':0.10}
 
     for inter in intervals:
         unit = inter[-1]
@@ -46,15 +47,16 @@ def getPercentageChange(asset_dict):
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
             #print("Success Change:",asset_dict['symbol'],change)
             asset_dict[inter] = change
+
+            if change >= outlier_param[inter]: print("Abnormal movement detected:",asset_dict['symbol'],'/ Change:',change,'/ Interval:',inter) # Possibly send telegram msg instead
     
     return asset_dict
-
 
 
 count=0
 while True:
     count+=1
-    if count == 10: break
+    #if count == 10: break
     print("Extracting after 1s")
     start_time = time.time()
     data = getPrices()
@@ -65,7 +67,10 @@ while True:
         sym_data['price'].append(float(asset['price']))
         sym_data = getPercentageChange(sym_data)
 
+    # Check for outlier movement of percentages
 
+
+    # Get market avg?
 
     print("Time taken to extract and append:",time.time()-start_time)
     while time.time() - start_time < 1: pass # Loop until 1s has passed to getPrices again
