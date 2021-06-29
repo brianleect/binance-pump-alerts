@@ -1,6 +1,12 @@
 import requests
 import time
-from params import outlier_param, intervals
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id
+import telegram as telegram
+
+bot = telegram.Bot(token=token)
+
+def send_message(message):
+    bot.send_message(chat_id=chat_id,text=message)
 
 def getPrices():
     url = 'https://api.binance.com/api/v3/ticker/price'
@@ -9,21 +15,32 @@ def getPrices():
 
 data = getPrices()
 full_data = []
-pairs_of_interest = ['USDT','BTC']
+
 
 # Initialize full_data
 for asset in data:
+    symbol = asset['symbol']
+
+    if len(watchlist) > 0: # Meaning watchlist has variables
+        if symbol not in watchlist: continue
+    else: # If watchlist is empty we take general variables
+        if (('UP' in symbol) or ('DOWN' in symbol) or ('BULL' in symbol) or ('BEAR' in symbol)) and ("SUPER" not in symbol):
+            print("Ignoring:",symbol)
+            continue # Remove leveraged tokens
+        if symbol[-4:] not in pairs_of_interest: continue # Should focus on usdt pairs to reduce noise
+
     tmp_dict = {}
     tmp_dict['symbol'] = asset['symbol']
     tmp_dict['price'] = [] # Initialize empty price array
 
+    print("Added symbol:",symbol)
     for interval in intervals:
         tmp_dict[interval] = 0
     
     full_data.append(tmp_dict)
 
-def searchSymbol(symbol_name):
-    for asset in full_data:
+def searchSymbol(symbol_name, data):
+    for asset in data:
         if asset['symbol'] == symbol_name: return asset
 
 def getPercentageChange(asset_dict):
@@ -45,7 +62,9 @@ def getPercentageChange(asset_dict):
             #print("Success Change:",asset_dict['symbol'],change)
             asset_dict[inter] = change
 
-            if change >= outlier_param[inter]: print("Abnormal movement detected:",asset_dict['symbol'],'/ Change:',change,'/ Interval:',inter) # Possibly send telegram msg instead
+            if change >= outlier_param[inter]: 
+                print("ALERT:",asset_dict['symbol'],'/ Change:',change,'/ Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                send_message("ALERT: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
     
     return asset_dict
 
@@ -53,16 +72,15 @@ def getPercentageChange(asset_dict):
 count=0
 while True:
     count+=1
-    #if count == 10: break
     print("Extracting after 1s")
     start_time = time.time()
     data = getPrices()
 
-    for asset in data:
+    for asset in full_data:
         symbol = asset['symbol']
-        sym_data = searchSymbol(symbol)
-        sym_data['price'].append(float(asset['price']))
-        sym_data = getPercentageChange(sym_data)
+        sym_data = searchSymbol(symbol,data)
+        asset['price'].append(float(sym_data['price']))
+        asset = getPercentageChange(asset)
 
     # Check for outlier movement of percentages
 
