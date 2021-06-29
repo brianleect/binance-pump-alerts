@@ -3,10 +3,15 @@ import time
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id
 import telegram as telegram
 
-bot = telegram.Bot(token=token)
+try:
+    bot = telegram.Bot(token=token)
 
-def send_message(message):
-    bot.send_message(chat_id=chat_id,text=message)
+    def send_message(message):
+        bot.send_message(chat_id=chat_id,text=message)
+except Exception as e:
+    print("Error initializing telegram bot")
+    print(e)
+    quit()
 
 def getPrices():
     url = 'https://api.binance.com/api/v3/ticker/price'
@@ -27,7 +32,7 @@ for asset in data:
         if (('UP' in symbol) or ('DOWN' in symbol) or ('BULL' in symbol) or ('BEAR' in symbol)) and ("SUPER" not in symbol):
             print("Ignoring:",symbol)
             continue # Remove leveraged tokens
-        if symbol[-4:] not in pairs_of_interest: continue # Should focus on usdt pairs to reduce noise
+        if symbol[-4:] not in pairs_of_interest and symbol[-3:] not in pairs_of_interest: continue # Should focus on usdt pairs to reduce noise
 
     tmp_dict = {}
     tmp_dict['symbol'] = asset['symbol']
@@ -38,6 +43,8 @@ for asset in data:
         tmp_dict[interval] = 0
     
     full_data.append(tmp_dict)
+
+print("Following",len(full_data),"pairs")
 
 def searchSymbol(symbol_name, data):
     for asset in data:
