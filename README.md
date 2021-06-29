@@ -23,6 +23,7 @@ Working demo telegram channel: https://t.me/joinchat/0fG8h0q-KKZmZjI1
 ## Todo
 1. Integrate with binance API to make trades on pumps
 2. Possibly improve on efficiency for storing data points
+3. Integrate with listing-predictor to monitor movements for potential listings
 
 ## Completed features
 1. Telegram integration
