@@ -2,6 +2,7 @@ import requests
 import time
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id
 import telegram as telegram
+from time import sleep
 
 try:
     bot = telegram.Bot(token=token)
@@ -14,9 +15,15 @@ except Exception as e:
     quit()
 
 def getPrices():
-    url = 'https://api.binance.com/api/v3/ticker/price'
-    data = requests.get(url).json()
-    return data
+    while True:
+        try:
+            url = 'https://api.binance.com/api/v3/ticker/price'
+            data = requests.get(url).json()
+            return data
+        except Exception as e:
+            print("Error:",e)
+            print("Retrying in 1s")
+            sleep(1) # Keeps trying every 0.5s 
 
 data = getPrices()
 full_data = []
@@ -71,8 +78,14 @@ def getPercentageChange(asset_dict):
 
             if change >= outlier_param[inter]: 
                 print("ALERT:",asset_dict['symbol'],'/ Change:',change,'/ Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("ALERT: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
-    
+                
+                while True:
+                    try:
+                        send_message("ALERT: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                        break
+                    except:
+                        print("Telegram bot error")
+                        sleep(0.5)
     return asset_dict
 
 
