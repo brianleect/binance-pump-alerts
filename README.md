@@ -2,7 +2,7 @@
 
 Simple application which gets price data from binance API and sends notification based on parameters set for % change.
 
-Working demo telegram channel: https://t.me/joinchat/0fG8h0q-KKZmZjI1
+Working demo telegram channel: https://t.me/binance_pump_alerts
 
 ## Usage
 
