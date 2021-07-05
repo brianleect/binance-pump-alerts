@@ -1,6 +1,6 @@
-# binance-price-tracker
+# Binance-pump-alerts
 
-Simple application which gets price data from binance API and sends notification based on parameters set for % change.
+Simple application which gets price data from binance API and sends telegram message based on parameters set used to detect pumps in Binance.
 
 Working demo telegram channel: https://t.me/binance_pump_alerts
 
