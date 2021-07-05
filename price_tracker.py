@@ -1,6 +1,6 @@
 import requests
 import time
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED
 import telegram as telegram
 from time import sleep
 
@@ -14,10 +14,13 @@ except Exception as e:
     print(e)
     quit()
 
+# Choose whether we look at spot prices or future prices
+if FUTURE_ENABLED: url = 'https://fapi.binance.com/fapi/v1/ticker/price'
+else: url = 'https://api.binance.com/api/v3/ticker/price'
+
 def getPrices():
     while True:
         try:
-            url = 'https://api.binance.com/api/v3/ticker/price'
             data = requests.get(url).json()
             return data
         except Exception as e:
