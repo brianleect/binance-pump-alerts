@@ -111,6 +111,8 @@ while True:
     # Get market avg?
 
     print("Time taken to extract and append:",time.time()-start_time)
-    while time.time() - start_time < 1: pass # Loop until 1s has passed to getPrices again
+    while time.time() - start_time < 1:
+        sleep(1-time.time()+start_time) # Sleeps for the remainder of 1s
+        pass # Loop until 1s has passed to getPrices again
 
 print(full_data)
