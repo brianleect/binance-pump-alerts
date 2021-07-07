@@ -95,7 +95,7 @@ def getPercentageChange(asset_dict):
 def checkTimeSinceReset():
     global init_time
     global full_data
-    if time.time() - init_time > 20: # Clear arrays every 3 hours
+    if time.time() - init_time > 60*60*3: # Clear arrays every 3 hours
         send_message('Emptying data to prevent mem error')
         for asset in full_data:
             asset['price'] = [] # Empty price array
