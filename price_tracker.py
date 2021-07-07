@@ -4,6 +4,8 @@ from params import outlier_param, intervals, watchlist, pairs_of_interest, token
 import telegram as telegram
 from time import sleep
 
+init_time = time.time()
+
 try:
     bot = telegram.Bot(token=token)
 
@@ -30,7 +32,6 @@ def getPrices():
 
 data = getPrices()
 full_data = []
-
 
 # Initialize full_data
 for asset in data:
@@ -91,6 +92,15 @@ def getPercentageChange(asset_dict):
                         sleep(0.5)
     return asset_dict
 
+def checkTimeSinceReset():
+    global init_time
+    global full_data
+    if time.time() - init_time > 20: # Clear arrays every 3 hours
+        send_message('Emptying data to prevent mem error')
+        for asset in full_data:
+            asset['price'] = [] # Empty price array
+
+        init_time = time.time()
 
 count=0
 while True:
@@ -99,6 +109,8 @@ while True:
     start_time = time.time()
     data = getPrices()
 
+    checkTimeSinceReset() # Clears logs if pass a certain time
+    
     for asset in full_data:
         symbol = asset['symbol']
         sym_data = searchSymbol(symbol,data)
