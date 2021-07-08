@@ -80,21 +80,21 @@ def getPercentageChange(asset_dict):
             #print("Success Change:",asset_dict['symbol'],change)
             asset_dict[inter] = change
             if change >= outlier_param[inter]: 
-                print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,3),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 
                 while True:
                     try:
-                        send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,3))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                        send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
                         break
                     except:
                         print("Telegram bot error")
                         sleep(0.5)
             elif DUMP_ENABLED and -change >= outlier_param[inter]:
-                print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,3),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 
                 while True:
                     try:
-                        send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,3))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                        send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
                         break
                     except:
                         print("Telegram bot error")
