@@ -33,3 +33,4 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 3. Adjustable parameters for % based on intervals
 4. Watchlist feature
 5. Monitor future markets
+6. Alert on dumps as well
