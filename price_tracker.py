@@ -1,6 +1,6 @@
 import requests
 import time
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED
 import telegram as telegram
 from time import sleep
 
@@ -79,17 +79,27 @@ def getPercentageChange(asset_dict):
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
             #print("Success Change:",asset_dict['symbol'],change)
             asset_dict[inter] = change
-
             if change >= outlier_param[inter]: 
-                print("ALERT:",asset_dict['symbol'],'/ Change:',change,'/ Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                print("PUMP:",asset_dict['symbol'],'/ Change:',change,'/ Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 
                 while True:
                     try:
-                        send_message("ALERT: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                        send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
                         break
                     except:
                         print("Telegram bot error")
                         sleep(0.5)
+            elif DUMP_ENABLED and -change >= outlier_param[inter]:
+                print("DUMP:",asset_dict['symbol'],'/ Change:',change,'/ Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                
+                while True:
+                    try:
+                        send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(change)+' / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                        break
+                    except:
+                        print("Telegram bot error")
+                        sleep(0.5)
+
     return asset_dict
 
 def checkTimeSinceReset():
