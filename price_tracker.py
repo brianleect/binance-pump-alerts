@@ -86,7 +86,9 @@ def getPercentageChange(asset_dict):
         data_points = durationToSeconds(inter)
 
         if data_points+1 > data_length: asset_dict[inter] = 0 # Set change to 0% due to insufficient data
-        elif time.time() - asset_dict['last_triggered'] < COOLDOWN: break # Skip checking for period since last triggered
+        elif time.time() - asset_dict['last_triggered'] < COOLDOWN: 
+            send_message("(TEST) Skipping",asset_dict['symbol'], "as on cooldown")
+            break # Skip checking for period since last triggered
         else: 
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
             asset_dict[inter] = change # Saves % change
