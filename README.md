@@ -18,8 +18,9 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 3. Pairs of interest: Default is USDT and BTC, 
 4. Watchlist: Default if left empty it'll look at ALL symbols after filtering by pairs of interest. If pairs are added to watchlist, program will **only track the pairs specified**.
 5. FUTURE_ENABLED: If true program will monitor **future** market else it will monitor **spot** market.
-6. Token: Telegram bot token obtained from @BotFather
-7. Chat_id: Bot will send message to this id, it can be a group or channel as well. To get personal chat_id, get it from @get_id_bot
+6. DUMP_ENABLED: If true program will alert on **DUMP** as well.
+7. Token: Telegram bot token obtained from @BotFather
+8. Chat_id: Bot will send message to this id, it can be a group or channel as well. To get personal chat_id, get it from @get_id_bot
 
 ## Todo
 1. Integrate with binance API to make trades on pumps
@@ -32,3 +33,4 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 3. Adjustable parameters for % based on intervals
 4. Watchlist feature
 5. Monitor future markets
+6. Alert on dumps as well
