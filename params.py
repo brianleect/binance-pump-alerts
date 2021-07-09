@@ -6,6 +6,7 @@ FUTURE_ENABLED=False
 DUMP_ENABLED = False
 MIN_ALERT_INTERVAL = '15s'
 RESET_INTERVAL = '3h'
+PRINT_DEBUG = True
 
 # Used for telegram bot updates
 token = ''  # Insert token obtained from @BotFather here

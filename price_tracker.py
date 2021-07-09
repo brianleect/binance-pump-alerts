@@ -1,6 +1,6 @@
 import requests
 import time
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG
 import telegram as telegram
 from time import sleep
 
@@ -117,7 +117,7 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
 count=0
 while True:
     count+=1
-    print("Extracting after 1s")
+    if PRINT_DEBUG: print("Extracting after 1s")
     start_time = time.time()
     data = getPrices()
 
@@ -129,7 +129,7 @@ while True:
         asset['price'].append(float(sym_data['price']))
         asset = getPercentageChange(asset)
 
-    print("Time taken to extract and append:",time.time()-start_time)
+    if PRINT_DEBUG: print("Time taken to extract and append:",time.time()-start_time)
     while time.time() - start_time < 1:
         sleep(1-time.time()+start_time) # Sleeps for the remainder of 1s
         pass # Loop until 1s has passed to getPrices again
