@@ -4,6 +4,8 @@ pairs_of_interest = ['USDT']
 watchlist = []  # E.g. ['ADAUSDT', 'ETHUSDT']
 FUTURE_ENABLED=False
 DUMP_ENABLED = False
+MIN_ALERT_INTERVAL = '15s'
+RESET_INTERVAL = '3h'
 
 # Used for telegram bot updates
 token = ''  # Insert token obtained from @BotFather here
