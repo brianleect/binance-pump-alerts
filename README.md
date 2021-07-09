@@ -21,7 +21,7 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 6. DUMP_ENABLED: If true program will alert on **DUMP** as well.
 7. MIN_ALERT_INTERVAL: Default '15s' will not trigger another alert within same pair for the specified duration
 8. RESET_INTERVAL: Default '3h', clears the array used to store data points to prevent MEM ERROR (Still testing), customizable as well
-9. PRINT_DEBUG: Default 'True',
+9. PRINT_DEBUG: Default 'True', sends extraction messages and duration
 8. Token: Telegram bot token obtained from @BotFather
 9. Chat_id: Bot will send message to this id, it can be a group or channel as well. To get personal chat_id, get it from @get_id_bot
 
