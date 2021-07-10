@@ -57,6 +57,9 @@ for asset in data:
     if len(watchlist) > 0: # Meaning watchlist has variables
         if symbol not in watchlist: continue
     else: # If watchlist is empty we take general variables
+        if float(asset['lastPrice']) == 0:  # Possible delisted symbols e.g. BCCUSDT
+            print("Delisted:",symbol)
+            continue
         if (('UP' in symbol) or ('DOWN' in symbol) or ('BULL' in symbol) or ('BEAR' in symbol)) and ("SUPER" not in symbol):
             print("Ignoring:",symbol)
             continue # Remove leveraged tokens
@@ -66,7 +69,6 @@ for asset in data:
     tmp_dict['symbol'] = asset['symbol']
     tmp_dict['price'] = [] # Initialize empty price array
     tmp_dict['volume'] = [] # Initialize empty volume array
-    tmp_dict['init_volume'] = asset['quoteVolume'] # Used as reference for volume change
     tmp_dict['last_triggered'] = time.time()
 
     print("Added symbol:",symbol)
@@ -83,16 +85,18 @@ def getPercentageChange(asset_dict):
     data_length = len(asset_dict['price'])
 
     for inter in intervals:
-        data_points = durationToSeconds(inter)
+        data_points = int(durationToSeconds(inter) / EXTRACT_INTERVAL)
 
         if data_points*2+1 > data_length: break # Skip unless sufficient data points, *2 for the volume comparison with previous interval
         elif time.time() - asset_dict['last_triggered'] < MIN_ALERT_INTERVAL: break # Skip checking for period since last triggered
         else: 
-            change = round((asset_dict['price'][-1] - asset_dict['price'][-1-int(data_points/EXTRACT_INTERVAL)]) / asset_dict['price'][-1],5)
+            change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
             
-            change_vol = asset_dict['volume'][-1] - asset_dict['volume'][-1-int(data_points/EXTRACT_INTERVAL)]
-            prev_change_vol = asset_dict['volume'][-1-int(data_points/EXTRACT_INTERVAL)] - asset_dict['volume'][-1-int(data_points/EXTRACT_INTERVAL)-int(data_points/EXTRACT_INTERVAL)]
-            change_vol_percent = round(((change_vol-prev_change_vol)/prev_change_vol)*100,2)
+            change_vol = asset_dict['volume'][-1] - asset_dict['volume'][-1-data_points]
+            prev_change_vol = asset_dict['volume'][-1-data_points] - asset_dict['volume'][-1-2*data_points]
+
+            if change_vol == 0 or prev_change_vol == 0 : change_vol_percent = 0
+            else: change_vol_percent = round(((change_vol-prev_change_vol)/prev_change_vol)*100,2)
 
             if change >= outlier_param[inter]:
                 asset_dict['last_triggered'] = time.time() # Updates last triggered time
@@ -106,8 +110,6 @@ def getPercentageChange(asset_dict):
                 print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) \
                     +' / Volume Change: '+str(change_vol_percent)+ '%' + ' / Interval: '+str(inter))
-            
-
 
 def checkTimeSinceReset(): # Used to solve MEM ERROR bug
     global init_time
@@ -121,17 +123,21 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
         init_time = time.time()
 
 count=0
+
 while True:
     count+=1
-    if PRINT_DEBUG: print("Extracting after 1s")
+    if PRINT_DEBUG: print("Extracting after",EXTRACT_INTERVAL,"s")
     start_time = time.time()
     data = getPrices()
 
     checkTimeSinceReset() # Clears logs if pass a certain time
-    
+
     for asset in full_data:
         symbol = asset['symbol']
         sym_data = searchSymbol(symbol,data)
+        if float(sym_data['lastPrice']) == 0: # Bug fix for possiblly delisted pairs, E.g. BCC
+            #if PRINT_DEBUG: print("[Delist] Ignoring:",symbol)
+            continue 
         asset['price'].append(float(sym_data['lastPrice']))
         asset['volume'].append(float(sym_data['quoteVolume']))
         getPercentageChange(asset)
