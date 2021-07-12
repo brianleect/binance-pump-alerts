@@ -1,6 +1,6 @@
 import requests
 import time
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL
 import telegram as telegram
 from time import sleep
 
@@ -23,9 +23,12 @@ def getPrices():
             sleep(1) # Keeps trying every 0.5s 
 
 init_time = time.time()
-COOLDOWN = durationToSeconds(MIN_ALERT_INTERVAL)
-print("Cooldown:",COOLDOWN)
+MIN_ALERT_INTERVAL = durationToSeconds(MIN_ALERT_INTERVAL)
+EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
+print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
+print("Extract interval:",EXTRACT_INTERVAL)
 
+# Initialize telegram bot
 try:
     bot = telegram.Bot(token=token)
 
@@ -83,24 +86,23 @@ def getPercentageChange(asset_dict):
     data_length = len(asset_dict['price'])
 
     for inter in intervals:
-        data_points = durationToSeconds(inter)
+        data_points = int(durationToSeconds(inter) / EXTRACT_INTERVAL)
 
-        if data_points+1 > data_length: asset_dict[inter] = 0 # Set change to 0% due to insufficient data
-        elif time.time() - asset_dict['last_triggered'] < COOLDOWN: break # Skip checking for period since last triggered
+        if data_points+1 > data_length: break
+        elif time.time() - asset_dict['last_triggered'] < MIN_ALERT_INTERVAL: break # Skip checking for period since last triggered
         else: 
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
-            asset_dict[inter] = change # Saves % change
 
             if change >= outlier_param[inter]:
                 asset_dict['last_triggered'] = time.time() # Updates last triggered time
-                print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
                 # Note that we don't need to break as we have updated 'last_triggered' parameter which will skip the remaining intervals
             
             elif DUMP_ENABLED and -change >= outlier_param[inter]:
                 asset_dict['last_triggered'] = time.time()
-                print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
+                send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
 
     return asset_dict
 
@@ -117,7 +119,7 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
 count=0
 while True:
     count+=1
-    if PRINT_DEBUG: print("Extracting after 1s")
+    if PRINT_DEBUG: print("Extracting after",EXTRACT_INTERVAL,'s')
     start_time = time.time()
     data = getPrices()
 
@@ -130,6 +132,6 @@ while True:
         asset = getPercentageChange(asset)
 
     if PRINT_DEBUG: print("Time taken to extract and append:",time.time()-start_time)
-    while time.time() - start_time < 1:
-        sleep(1-time.time()+start_time) # Sleeps for the remainder of 1s
+    while time.time() - start_time < EXTRACT_INTERVAL:
+        sleep(EXTRACT_INTERVAL-time.time()+start_time) # Sleeps for the remainder of 1s
         pass # Loop until 1s has passed to getPrices again
