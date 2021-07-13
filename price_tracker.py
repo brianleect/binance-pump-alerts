@@ -1,6 +1,8 @@
 import requests
 import time
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL
+from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
+     DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
+     SEND_TELEGRAM_FAIL_INTERVAL
 import telegram as telegram
 from time import sleep
 
@@ -19,12 +21,14 @@ def getPrices():
             return data
         except Exception as e:
             print("Error:",e)
-            print("Retrying in 1s")
-            sleep(1) # Keeps trying every 0.5s 
+            print("Retrying in",GET_PRICE_FAIL_INTERVAL,"s")
+            sleep(GET_PRICE_FAIL_INTERVAL) # Keeps trying every 0.5s 
 
 init_time = time.time()
 MIN_ALERT_INTERVAL = durationToSeconds(MIN_ALERT_INTERVAL)
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
+GET_PRICE_FAIL_INTERVAL = durationToSeconds(GET_PRICE_FAIL_INTERVAL)
+SEND_TELEGRAM_FAIL_INTERVAL = durationToSeconds(SEND_TELEGRAM_FAIL_INTERVAL)
 print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
 print("Extract interval:",EXTRACT_INTERVAL)
 
@@ -38,8 +42,8 @@ try:
                 bot.send_message(chat_id=chat_id,text=message)
                 break
             except:
-                print("Telegram bot error")
-                sleep(0.5)
+                print("Retrying to send tele message in",SEND_TELEGRAM_FAIL_INTERVAL,"s")
+                sleep(SEND_TELEGRAM_FAIL_INTERVAL)
 except Exception as e:
     print("Error initializing telegram bot")
     print(e)
