@@ -25,10 +25,11 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 8. Token: Telegram bot token obtained from @BotFather
 9. Chat_id: Bot will send message to this id, it can be a group or channel as well. To get personal chat_id, get it from @get_id_bot
 
+For params not indicated above, refer to comments besides parameter for its use.
+
 ## Todo
 1. Integrate with binance API to make trades on pumps
-2. Possibly improve on efficiency for storing data points
-3. Integrate with listing-predictor to monitor movements for potential listings
+2. Integrate with listing-predictor to monitor movements for potential listings
 
 ## Completed features
 1. Telegram integration
@@ -39,3 +40,5 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 6. Optional alert on dumps
 7. Customizable minimum alert interval for spam prevention
 8. Option to disable print debugs on extraction
+9. [Test] Volume Change Updates (TEST_VOL version)
+10. Allows long period of running without MEM ERROR
