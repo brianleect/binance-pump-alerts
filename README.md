@@ -12,7 +12,7 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 4. Add pairs to watch into watchlist or leave it empty to monitor all tickers on binance
 5. Run "price_tracker.py" with command ```python price_tracker.py```
 
-(TEST_VOL VERSION) (Outputs change in volume relative to the previous interval)
+### (TEST_VOL VERSION) (Outputs change in volume relative to the previous interval)
 1. Same usage, but minimum interval is 2s (Buggy partially working), recommended to use any interval >2s E.g. 5s instead. 
 
 ## Further explanation on parameters file
