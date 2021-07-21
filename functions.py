@@ -84,7 +84,7 @@ def getPercentageChange(asset_dict):
 def topPumpDump(last_trigger_pd,full_asset):
     if time.time() > last_trigger_pd + durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL) + 1:
         msg = ''
-        msg += 'Interval: ' + TOP_PUMP_DUMP_ALERT_INTERVAL + '\n'
+        msg += 'Interval: ' + TOP_PUMP_DUMP_ALERT_INTERVAL + '\n\n'
         if TOP_PUMP_ENABLED:
             pump_sorted_list = sorted(full_asset, key = lambda i: i[TOP_PUMP_DUMP_ALERT_INTERVAL],reverse=True)[0:VIEW_NUMBER]
             msg += 'Top ' + str(VIEW_NUMBER) + ' PUMP\n'
