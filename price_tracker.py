@@ -8,11 +8,10 @@ from functions import durationToSeconds, getPrices, send_message, searchSymbol, 
 from time import sleep
 
 init_time = time.time()
-MIN_ALERT_INTERVAL = durationToSeconds(MIN_ALERT_INTERVAL)
+
+RESET_INTERVAL = durationToSeconds(RESET_INTERVAL)
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
-GET_PRICE_FAIL_INTERVAL = durationToSeconds(GET_PRICE_FAIL_INTERVAL)
-SEND_TELEGRAM_FAIL_INTERVAL = durationToSeconds(SEND_TELEGRAM_FAIL_INTERVAL)
-TOP_PUMP_DUMP_ALERT_INTERVAL = durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL)
+
 print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
 print("Extract interval:",EXTRACT_INTERVAL)
 
