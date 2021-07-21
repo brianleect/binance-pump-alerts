@@ -45,3 +45,4 @@ For params not indicated above, refer to comments besides parameter for its use.
 8. Option to disable print debugs on extraction
 9. [Test] Volume Change Updates (TEST_VOL version)
 10. Allows long period of running without MEM ERROR
+11. Send periodic Top X dumped / pumped coins
