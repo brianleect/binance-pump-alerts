@@ -1,5 +1,5 @@
-intervals = ['1s','5s','15s', '30s', '1m']
-outlier_param = {'1s':0.02,'5s':0.03,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10}
+intervals = ['1s','5s','15s', '30s', '1m','15m','30m','1h']
+outlier_param = {'1s':0.02,'5s':0.03,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10,'15m':0.15,'30m':0.20,'1h':0.30}
 pairs_of_interest = ['USDT'] # Other options include 'BTC' , 'ETH'
 watchlist = []  # E.g. ['ADAUSDT', 'ETHUSDT'] # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
 
@@ -9,7 +9,7 @@ DUMP_ENABLED = True # Determine whether to look at DUMP
 
 TOP_PUMP_ENABLED = True # Set to false if not interested in top pump info
 TOP_DUMP_ENABLED = True # Set to false if not interested in top dump info
-TOP_PUMP_DUMP_ALERT_INTERVAL = '1m' # Interval for information to be sent
+TOP_PUMP_DUMP_ALERT_INTERVAL = '1h' # Interval for information to be sent
 VIEW_NUMBER = 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
 
 
