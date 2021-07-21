@@ -1,57 +1,20 @@
 import requests
 import time
+import telegram as telegram
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL
-import telegram as telegram
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER
+from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
-
-def durationToSeconds(str_dur):
-    unit = str_dur[-1]
-    if unit == 's': unit = 1
-    elif unit == 'm': unit = 60
-    elif unit == 'h': unit = 3600
-
-    return  int(str_dur[:-1]) * unit
-
-def getPrices():
-    while True:
-        try:
-            data = requests.get(url).json()
-            return data
-        except Exception as e:
-            print("Error:",e)
-            print("Retrying in",GET_PRICE_FAIL_INTERVAL,"s")
-            sleep(GET_PRICE_FAIL_INTERVAL) # Keeps trying every 0.5s 
 
 init_time = time.time()
 MIN_ALERT_INTERVAL = durationToSeconds(MIN_ALERT_INTERVAL)
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 GET_PRICE_FAIL_INTERVAL = durationToSeconds(GET_PRICE_FAIL_INTERVAL)
 SEND_TELEGRAM_FAIL_INTERVAL = durationToSeconds(SEND_TELEGRAM_FAIL_INTERVAL)
+TOP_PUMP_DUMP_ALERT_INTERVAL = durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL)
 print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
 print("Extract interval:",EXTRACT_INTERVAL)
-
-# Initialize telegram bot
-try:
-    bot = telegram.Bot(token=token)
-
-    def send_message(message):
-        while True:
-            try:
-                bot.send_message(chat_id=chat_id,text=message)
-                break
-            except:
-                print("Retrying to send tele message in",SEND_TELEGRAM_FAIL_INTERVAL,"s")
-                sleep(SEND_TELEGRAM_FAIL_INTERVAL)
-except Exception as e:
-    print("Error initializing telegram bot")
-    print(e)
-    quit()
-
-# Choose whether we look at spot prices or future prices
-if FUTURE_ENABLED: url = 'https://fapi.binance.com/fapi/v1/ticker/price'
-else: url = 'https://api.binance.com/api/v3/ticker/price'
 
 data = getPrices()
 full_data = []
@@ -81,46 +44,19 @@ for asset in data:
 
 print("Following",len(full_data),"pairs")
 
-def searchSymbol(symbol_name, data):
-    for asset in data:
-        if asset['symbol'] == symbol_name: return asset
-
-def getPercentageChange(asset_dict):
-
-    data_length = len(asset_dict['price'])
-
-    for inter in intervals:
-        data_points = int(durationToSeconds(inter) / EXTRACT_INTERVAL)
-
-        if data_points+1 > data_length: break
-        elif time.time() - asset_dict['last_triggered'] < MIN_ALERT_INTERVAL: break # Skip checking for period since last triggered
-        else: 
-            change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
-
-            if change >= outlier_param[inter]:
-                asset_dict['last_triggered'] = time.time() # Updates last triggered time
-                if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
-                # Note that we don't need to break as we have updated 'last_triggered' parameter which will skip the remaining intervals
-            
-            elif DUMP_ENABLED and -change >= outlier_param[inter]:
-                asset_dict['last_triggered'] = time.time()
-                if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
-
-    return asset_dict
-
 def checkTimeSinceReset(): # Used to solve MEM ERROR bug
     global init_time
     global full_data
     if time.time() - init_time > durationToSeconds(RESET_INTERVAL): # Clear arrays every 3 hours
-        send_message('Emptying data to prevent mem error')
+        #send_message('Emptying data to prevent mem error',bot) # Not really needed.
         for asset in full_data:
             asset['price'] = [] # Empty price array
 
         init_time = time.time()
 
 count=0
+send_message("Bot has started")
+tpda_last_trigger = time.time()
 while True:
     count+=1
     if PRINT_DEBUG: print("Extracting after",EXTRACT_INTERVAL,'s')
@@ -134,6 +70,9 @@ while True:
         sym_data = searchSymbol(symbol,data)
         asset['price'].append(float(sym_data['price']))
         asset = getPercentageChange(asset)
+
+    
+    tpda_last_trigger = topPumpDump(tpda_last_trigger,full_data) # Triggers check for top_pump_dump
 
     if PRINT_DEBUG: print("Time taken to extract and append:",time.time()-start_time)
     while time.time() - start_time < EXTRACT_INTERVAL:
