@@ -87,7 +87,7 @@ def getPercentageChange(asset_dict):
     return asset_dict
 
 def topPumpDump(last_trigger_pd,full_asset):
-    if time.time() > last_trigger_pd + durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL) + 1:
+    if time.time() > last_trigger_pd + durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL) + 3:
         msg = ''
         msg += 'Interval: ' + TOP_PUMP_DUMP_ALERT_INTERVAL + '\n\n'
         if TOP_PUMP_ENABLED:
