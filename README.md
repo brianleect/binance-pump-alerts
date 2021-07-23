@@ -12,8 +12,9 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 4. Add pairs to watch into watchlist or leave it empty to monitor all tickers on binance
 5. Run "price_tracker.py" with command ```python price_tracker.py```
 
-Optional: TEST_VOL VERSION (Outputs change in volume relative to the previous interval)
+#### Optional: TEST_VOL VERSION (Outputs change in volume relative to the previous interval)
 1. Same usage, but minimum interval is 2s (Buggy partially working), recommended to use any interval >2s E.g. 5s instead. 
+---
 
 ## Main Customizable Params
 1. Intervals: Can be modified to consider other timeframes, follow the format of 's' for second, 'm' for minute, 'h' for hour
@@ -40,6 +41,7 @@ Optional: TEST_VOL VERSION (Outputs change in volume relative to the previous in
 5. tpdpa_chat_id: Insert Chat ID for top pump dump alert, if left at 0 it'll send to chat_id
 For params not indicated above, refer to comments besides parameter for its use.
 
+---
 ## Todo
 1. Integrate with binance API to make trades on pumps
 2. Integrate with listing-predictor to monitor movements for potential listings
