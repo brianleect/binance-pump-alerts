@@ -1,6 +1,6 @@
 # Main params
-intervals = ['1s','5s','15s', '30s', '1m','15m','30m','1h']
-outlier_param = {'1s':0.02,'5s':0.03,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10,'15m':0.15,'30m':0.20,'1h':0.30}
+intervals = ['1s','5s','15s', '30s', '1m','15m','30m','1h','3h']
+outlier_param = {'1s':0.02,'5s':0.03,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10,'15m':0.15,'30m':0.20,'1h':0.30,'3h':0.4}
 pairs_of_interest = ['USDT'] # Other options include 'BTC' , 'ETH'
 
 # Optional Watchlist only mode
