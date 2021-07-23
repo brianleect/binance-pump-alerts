@@ -47,7 +47,7 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
     global init_time
     global full_data
     if time.time() - init_time > durationToSeconds(RESET_INTERVAL): # Clear arrays every 3 hours
-        #send_message('Emptying data to prevent mem error',bot) # Not really needed.
+        print('Emptying data to prevent mem error') # Logs to console only, reduces spam
         for asset in full_data:
             asset['price'] = [] # Empty price array
 
