@@ -6,7 +6,9 @@ from params import outlier_param, intervals, watchlist, pairs_of_interest, token
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
+import datetime
 
+init_dt = datetime.datetime.now()
 init_time = time.time()
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 
@@ -71,7 +73,7 @@ while True:
     
     tpda_last_trigger = topPumpDump(tpda_last_trigger,full_data) # Triggers check for top_pump_dump
 
-    if PRINT_DEBUG: print("Time taken to extract and append:",time.time()-start_time)
+    if PRINT_DEBUG: print("Extract time:",time.time()-start_time,'/ Time ran:',datetime.datetime.now()-init_dt)
     while time.time() - start_time < EXTRACT_INTERVAL:
         sleep(EXTRACT_INTERVAL-time.time()+start_time) # Sleeps for the remainder of 1s
         pass # Loop until 1s has passed to getPrices again
