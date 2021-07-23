@@ -1,8 +1,8 @@
 import requests
 import time
-from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
-     DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED
+from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, tpdpa_chat_id,\
+     FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED, 
 from time import sleep
 import telegram as telegram
 
@@ -22,10 +22,15 @@ def durationToSeconds(str_dur):
 
     return  int(str_dur[:-1]) * unit
 
-def send_message(message):
+def send_message(message,isTPDA=False):
+    if isTPDA: 
+        if tpdpa_chat_id == 0: c_id = chat_id
+        else: c_id = tpdpa_chat_id
+    else: c_id = chat_id
+
     while True:
         try:
-            bot.send_message(chat_id=chat_id,text=message)
+            bot.send_message(chat_id=c_id,text=message)
             break
         except:
             print("Retrying to send tele message in",SEND_TELEGRAM_FAIL_INTERVAL,"s")
@@ -103,7 +108,7 @@ def topPumpDump(last_trigger_pd,full_asset):
                 print(asset['symbol'],':',asset[TOP_PUMP_DUMP_ALERT_INTERVAL])
                 msg += str(asset['symbol']) + ': ' + str(round(asset[TOP_PUMP_DUMP_ALERT_INTERVAL]*100,2)) + '%\n'
 
-        send_message(msg)
+        send_message(msg,isTPDA=True)
         
         return time.time()
     else: return last_trigger_pd
