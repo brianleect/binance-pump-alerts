@@ -8,8 +8,6 @@ from functions import durationToSeconds, getPrices, send_message, searchSymbol, 
 from time import sleep
 
 init_time = time.time()
-
-RESET_INTERVAL = durationToSeconds(RESET_INTERVAL)
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 
 print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
