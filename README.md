@@ -12,10 +12,10 @@ Working demo telegram channel: https://t.me/binance_pump_alerts
 4. Add pairs to watch into watchlist or leave it empty to monitor all tickers on binance
 5. Run "price_tracker.py" with command ```python price_tracker.py```
 
-### (TEST_VOL VERSION) (Outputs change in volume relative to the previous interval)
+Optional: TEST_VOL VERSION (Outputs change in volume relative to the previous interval)
 1. Same usage, but minimum interval is 2s (Buggy partially working), recommended to use any interval >2s E.g. 5s instead. 
 
-## Further explanation on parameters file
+## Main Customizable Params
 1. Intervals: Can be modified to consider other timeframes, follow the format of 's' for second, 'm' for minute, 'h' for hour
 2. Outlier param: (0.01 -> 1% , 0.10 -> 10%), modify accordingly based on needs. Avoid setting it too low or there might be quite a bit of spam.
 3. Pairs of interest: Default is USDT and BTC, 
