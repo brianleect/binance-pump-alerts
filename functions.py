@@ -76,15 +76,17 @@ def getPercentageChange(asset_dict):
 
             if change >= outlier_param[inter]:
                 asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time
-                if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
+                if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) 
+                send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) 
                 # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining intervals
+                return asset_dict # Prevents continuation of checking other intervals
             
             elif DUMP_ENABLED and -change >= outlier_param[inter]:
                 asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time
-                if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
-                send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
-
+                if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) 
+                send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) 
+                return asset_dict # Prevents continuation of checking other intervals
+            
     return asset_dict
 
 def topPumpDump(last_trigger_pd,full_asset):
