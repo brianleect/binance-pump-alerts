@@ -68,19 +68,21 @@ def getPercentageChange(asset_dict):
         data_points = int(durationToSeconds(inter) / EXTRACT_INTERVAL)
 
         if data_points+1 > data_length: break
-        elif time.time() - asset_dict['last_triggered'] < MIN_ALERT_INTERVAL: break # Skip checking for period since last triggered
+        elif (time.time() - asset_dict['lt_dict'][inter] < durationToSeconds(inter)): 
+            print("Duration insufficient",asset_dict['symbol'],inter)
+            break # Skip checking for period since last triggered
         else: 
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
             asset_dict[inter] = change # Stores change for the interval into asset dict (Used for top pump/dumps)
 
             if change >= outlier_param[inter]:
-                asset_dict['last_triggered'] = time.time() #W Updates last triggered time
+                asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time
                 if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 send_message("PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
-                # Note that we don't need to break as we have updated 'last_triggered' parameter which will skip the remaining intervals
+                # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining intervals
             
             elif DUMP_ENABLED and -change >= outlier_param[inter]:
-                asset_dict['last_triggered'] = time.time()
+                asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time
                 if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) # Possibly send telegram msg instead
                 send_message("DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) # Possibly send telegram msg instead
 

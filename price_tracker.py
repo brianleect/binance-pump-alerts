@@ -33,12 +33,12 @@ for asset in data:
     tmp_dict = {}
     tmp_dict['symbol'] = asset['symbol']
     tmp_dict['price'] = [] # Initialize empty price array
-    tmp_dict['last_triggered'] = time.time()
+    tmp_dict['lt_dict'] = {}
 
     print("Added symbol:",symbol)
     for interval in intervals:
         tmp_dict[interval] = 0
-    
+        tmp_dict['lt_dict'][interval] = time.time()
     full_data.append(tmp_dict)
 
 print("Following",len(full_data),"pairs")
