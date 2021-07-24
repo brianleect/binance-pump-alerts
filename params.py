@@ -16,9 +16,8 @@ DUMP_ENABLED = True # Determine whether to look at DUMP
 # Top Pump & Dump Feature Params
 TOP_PUMP_ENABLED = True # Set to false if not interested in top pump info
 TOP_DUMP_ENABLED = True # Set to false if not interested in top dump info
-TOP_PUMP_DUMP_ALERT_INTERVAL = '1h' # Interval for information to be sent
 VIEW_NUMBER = 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
-TDPA_INTERVALS = ['1h','3h','6h'] # Max interval is equivalent to RESET_INTERVAL
+TDPA_INTERVALS = ['1h','3h','6h'] # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
 
 # Debug Params (Avoid touching it if there's no issues)
 PRINT_DEBUG = True # If false we do not print messages
