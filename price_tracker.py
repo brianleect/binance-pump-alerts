@@ -2,7 +2,7 @@ import requests
 import time
 import telegram as telegram
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
-     DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
+     DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
@@ -12,7 +12,6 @@ init_dt = datetime.datetime.now()
 init_time = time.time()
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 
-print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
 print("Extract interval:",EXTRACT_INTERVAL)
 
 data = getPrices()

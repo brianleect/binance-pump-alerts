@@ -1,7 +1,7 @@
 import requests
 import time
 from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, tpdpa_chat_id,\
-     FUTURE_ENABLED, DUMP_ENABLED, MIN_ALERT_INTERVAL, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
+     FUTURE_ENABLED, DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED
 from time import sleep
 import telegram as telegram
@@ -36,7 +36,6 @@ def send_message(message,isTPDA=False):
             print("Retrying to send tele message in",SEND_TELEGRAM_FAIL_INTERVAL,"s")
             sleep(SEND_TELEGRAM_FAIL_INTERVAL)
 
-MIN_ALERT_INTERVAL = durationToSeconds(MIN_ALERT_INTERVAL)
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 GET_PRICE_FAIL_INTERVAL = durationToSeconds(GET_PRICE_FAIL_INTERVAL)
 SEND_TELEGRAM_FAIL_INTERVAL = durationToSeconds(SEND_TELEGRAM_FAIL_INTERVAL)
