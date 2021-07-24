@@ -1,7 +1,10 @@
 # Main params
-intervals = ['1s','5s','15s', '30s', '1m','15m','30m','1h','3h']
-outlier_param = {'1s':0.02,'5s':0.03,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10,'15m':0.15,'30m':0.20,'1h':0.30,'3h':0.4}
+intervals = ['1s','5s','15s', '30s', '1m','15m','30m','1h','3h','6h']
+outlier_param = {'1s':0.02,'5s':0.05,'15s':0.06,'30s':0.08,'1m':0.1,'5m':0.10,'15m':0.15,'30m':0.20,'1h':0.30,'3h':0.4,'6h':0.5}
 pairs_of_interest = ['USDT'] # Other options include 'BTC' , 'ETH'
+
+# Useful Params
+EXTRACT_INTERVAL = '1s'  # Interval between each price extract
 
 # Optional Watchlist only mode
 watchlist = []  # E.g. ['ADAUSDT', 'ETHUSDT'] # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
@@ -13,13 +16,9 @@ DUMP_ENABLED = True # Determine whether to look at DUMP
 # Top Pump & Dump Feature Params
 TOP_PUMP_ENABLED = True # Set to false if not interested in top pump info
 TOP_DUMP_ENABLED = True # Set to false if not interested in top dump info
-TOP_PUMP_DUMP_ALERT_INTERVAL = '3h' # Interval for information to be sent
+TOP_PUMP_DUMP_ALERT_INTERVAL = '1h' # Interval for information to be sent
 VIEW_NUMBER = 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
-
-
-# Useful Params
-MIN_ALERT_INTERVAL = '15s' # Minimum interval between alerts for SAME pair
-EXTRACT_INTERVAL = '1s'  # Interval between each price extract
+TDPA_INTERVALS = ['1h','3h','6h'] # Max interval is equivalent to RESET_INTERVAL
 
 # Debug Params (Avoid touching it if there's no issues)
 PRINT_DEBUG = True # If false we do not print messages

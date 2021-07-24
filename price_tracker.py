@@ -3,7 +3,7 @@ import time
 import telegram as telegram
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
 import datetime
@@ -54,7 +54,10 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
 
 count=0
 send_message("Bot has started")
-tpda_last_trigger = time.time()
+
+tpda_last_trigger = {}
+for inter in TDPA_INTERVALS: tpda_last_trigger[inter] = time.time()
+ 
 while True:
     count+=1
     if PRINT_DEBUG: print("Extracting after",EXTRACT_INTERVAL,'s')
@@ -70,7 +73,7 @@ while True:
         asset = getPercentageChange(asset)
 
     
-    tpda_last_trigger = topPumpDump(tpda_last_trigger,full_data) # Triggers check for top_pump_dump
+    topPumpDump(tpda_last_trigger,full_data) # Triggers check for top_pump_dump
 
     if PRINT_DEBUG: print("Extract time:",time.time()-start_time,'/ Time ran:',datetime.datetime.now()-init_dt)
     while time.time() - start_time < EXTRACT_INTERVAL:

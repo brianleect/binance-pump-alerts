@@ -2,7 +2,7 @@ import requests
 import time
 from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, tpdpa_chat_id,\
      FUTURE_ENABLED, DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_DUMP_ALERT_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED, TDPA_INTERVALS
 from time import sleep
 import telegram as telegram
 
@@ -90,30 +90,31 @@ def getPercentageChange(asset_dict):
     return asset_dict
 
 def topPumpDump(last_trigger_pd,full_asset):
-    if time.time() > last_trigger_pd + durationToSeconds(TOP_PUMP_DUMP_ALERT_INTERVAL) + 8:
-        msg = ''
-        msg += 'Interval: ' + TOP_PUMP_DUMP_ALERT_INTERVAL + '\n\n'
-        if TOP_PUMP_ENABLED:
-            pump_sorted_list = sorted(full_asset, key = lambda i: i[TOP_PUMP_DUMP_ALERT_INTERVAL],reverse=True)[0:VIEW_NUMBER]
-            msg += 'Top ' + str(VIEW_NUMBER) + ' PUMP\n'
-            print("Top",VIEW_NUMBER,"PUMP")
-            for asset in pump_sorted_list: 
-                print(asset['symbol'],':',asset[TOP_PUMP_DUMP_ALERT_INTERVAL])
-                msg += str(asset['symbol']) + ': ' + str(round(asset[TOP_PUMP_DUMP_ALERT_INTERVAL]*100,2)) + '%\n'
+    for inter in last_trigger_pd:
+        if time.time() > last_trigger_pd[inter] + durationToSeconds(inter) + 8:
+            msg = ''
+            msg += 'Interval: ' + inter + '\n\n'
+            if TOP_PUMP_ENABLED:
+                pump_sorted_list = sorted(full_asset, key = lambda i: i[inter],reverse=True)[0:VIEW_NUMBER]
+                msg += 'Top ' + str(VIEW_NUMBER) + ' PUMP\n'
+                print("Top",VIEW_NUMBER,"PUMP")
+                for asset in pump_sorted_list: 
+                    print(asset['symbol'],':',asset[inter])
+                    msg += str(asset['symbol']) + ': ' + str(round(asset[inter]*100,2)) + '%\n'
 
-            msg += '\n'
+                msg += '\n'
 
-        if TOP_DUMP_ENABLED:
-            dump_sorted_list = sorted(full_asset, key = lambda i: i[TOP_PUMP_DUMP_ALERT_INTERVAL])[0:VIEW_NUMBER]
-            print("Top",VIEW_NUMBER,"DUMP")
-            msg += 'Top ' + str(VIEW_NUMBER) + ' DUMP\n'
-            for asset in dump_sorted_list: 
-                print(asset['symbol'],':',asset[TOP_PUMP_DUMP_ALERT_INTERVAL])
-                msg += str(asset['symbol']) + ': ' + str(round(asset[TOP_PUMP_DUMP_ALERT_INTERVAL]*100,2)) + '%\n'
+            if TOP_DUMP_ENABLED:
+                dump_sorted_list = sorted(full_asset, key = lambda i: i[inter])[0:VIEW_NUMBER]
+                print("Top",VIEW_NUMBER,"DUMP")
+                msg += 'Top ' + str(VIEW_NUMBER) + ' DUMP\n'
+                for asset in dump_sorted_list: 
+                    print(asset['symbol'],':',asset[inter])
+                    msg += str(asset['symbol']) + ': ' + str(round(asset[inter]*100,2)) + '%\n'
 
-        send_message(msg,isTPDA=True)
-        
-        return time.time()
+            send_message(msg,isTPDA=True)
+            
+            last_trigger_pd[inter] = time.time() # Update time for trigger
     else: return last_trigger_pd
 
 
