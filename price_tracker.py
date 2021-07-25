@@ -3,7 +3,7 @@ import time
 import telegram as telegram
 from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
 import datetime
@@ -12,6 +12,8 @@ init_dt = datetime.datetime.now()
 init_time = time.time()
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
 
+if not HARD_ALERT_INTERVAL_ENABLED: print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
+else: print("Hard Alert Interval is being used")
 print("Extract interval:",EXTRACT_INTERVAL)
 
 data = getPrices()
@@ -32,7 +34,8 @@ for asset in data:
     tmp_dict = {}
     tmp_dict['symbol'] = asset['symbol']
     tmp_dict['price'] = [] # Initialize empty price array
-    tmp_dict['lt_dict'] = {}
+    tmp_dict['lt_dict'] = {} # Used for HARD_ALERT_INTERVAL
+    tmp_dict['last_triggered'] = time.time() # Used for MIN_ALERT_INTERVAL
 
     print("Added symbol:",symbol)
     for interval in intervals:
