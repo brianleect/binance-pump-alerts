@@ -6,8 +6,9 @@ pairs_of_interest = ['USDT'] # Other options include 'BTC' , 'ETH'
 # Useful Params
 EXTRACT_INTERVAL = '1s'  # Interval between each price extract
 
+# Alert Interval Params
 HARD_ALERT_INTERVAL_ENABLED = True # If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
-MIN_ALERT_INTERVAL = '5m' # Default set to 0s, to trigger make it true
+MIN_ALERT_INTERVAL = '5m' # Minimum interval between each Alert  # Only will be utlized when HARD_ALERT_INTERVAL is False. 
 
 # Optional Watchlist only mode
 watchlist = []  # E.g. ['ADAUSDT', 'ETHUSDT'] # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
