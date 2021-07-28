@@ -68,7 +68,7 @@ def getPercentageChange(asset_dict):
 
         if data_points+1 > data_length: break
         elif not HARD_ALERT_INTERVAL_ENABLED and (time.time() - asset_dict['last_triggered'] < MIN_ALERT_INTERVAL):  break # Skip checking for period since last triggered
-        elif (time.time() - asset_dict['lt_dict'][inter] < durationToSeconds(inter)): 
+        elif HARD_ALERT_INTERVAL_ENABLED and (time.time() - asset_dict['lt_dict'][inter] < durationToSeconds(inter)): # Check for HARD_ALERT_INTERVAL
             print("Duration insufficient",asset_dict['symbol'],inter)
             break # Skip checking for period since last triggered
         else: 
