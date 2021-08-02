@@ -17,6 +17,7 @@ else: print("Hard Alert Interval is being used")
 print("Extract interval:",EXTRACT_INTERVAL)
 
 data = getPrices()
+init_data = data[:] # Used for checking for new listings
 full_data = []
 
 # Initialize full_data
@@ -55,11 +56,44 @@ def checkTimeSinceReset(): # Used to solve MEM ERROR bug
 
         init_time = time.time()
 
+def checkNewListings(data_t):
+    global full_data
+    global init_data
+
+    if len(init_data) != len(data_t):
+        send_message(str(len(data_t)-len(init_data))+" new pairs found, adding to monitored list")
+
+        init_symbols = [asset['symbol'] for asset in init_data]
+        symbols_to_add = [asset['symbol'] for asset in data_t if asset['symbol'] not in init_symbols ]
+        
+        for symbol in symbols_to_add:
+
+            if symbol[-4:] not in pairs_of_interest and symbol[-3:] not in pairs_of_interest: 
+                send_message("(New Listing) Ignoring: "+symbol+" as not in pair of interest") # Ignores pairs not specified
+                continue 
+
+            tmp_dict = {}
+            tmp_dict['symbol'] = symbol
+            tmp_dict['price'] = [] # Initialize empty price array
+            tmp_dict['lt_dict'] = {} # Used for HARD_ALERT_INTERVAL
+            tmp_dict['last_triggered'] = time.time() # Used for MIN_ALERT_INTERVAL
+
+            print("Added symbol:",symbol)
+            send_message("Added symbol: "+symbol)
+
+            for interval in intervals:
+                tmp_dict[interval] = 0
+                tmp_dict['lt_dict'][interval] = time.time()
+            
+            full_data.append(tmp_dict)
+
+        init_data = data_t[:] # Updates init data 
+
 count=0
 send_message("Bot has started")
 
 tpda_last_trigger = {}
-for inter in TDPA_INTERVALS: tpda_last_trigger[inter] = time.time()
+for inter in TDPA_INTERVALS: tpda_last_trigger[inter] = time.time() # Set TDPA interval
  
 while True:
     count+=1
@@ -67,6 +101,7 @@ while True:
     start_time = time.time()
     data = getPrices()
 
+    checkNewListings(data)
     checkTimeSinceReset() # Clears logs if pass a certain time
     
     for asset in full_data:
