@@ -4,6 +4,9 @@ Simple application which gets price data from binance API and sends telegram mes
 
 Working demo telegram channel: https://t.me/binance_pump_alerts (Hosted on AWS ec2 running latest version 24/7) 
 
+![image](https://user-images.githubusercontent.com/63389110/127960171-fb5dbd52-1bc7-4f60-af30-8536e840235b.png)
+
+
 ## Usage
 
 1. In command line run ```pip install -r requirements.txt``` while located at folder with code.
