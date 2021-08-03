@@ -2,7 +2,7 @@
 
 Simple application which gets price data from binance API and sends telegram message based on parameters set used to detect pumps in Binance.
 
-Working demo telegram channel: https://t.me/binance_pump_alerts
+Working demo telegram channel: https://t.me/binance_pump_alerts (Hosted on AWS ec2 running latest version 24/7) 
 
 ## Usage
 
