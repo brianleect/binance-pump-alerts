@@ -1,9 +1,10 @@
 import requests
 import time
 import telegram as telegram
-from params import outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
+from params import TDPA_INITIAL_BUFFER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
-     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL
+     SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL,\
+     TDPA_INITIAL_BUFFER
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
 import datetime
@@ -11,6 +12,7 @@ import datetime
 init_dt = datetime.datetime.now()
 init_time = time.time()
 EXTRACT_INTERVAL = durationToSeconds((EXTRACT_INTERVAL))
+TDPA_INITIAL_BUFFER = durationToSeconds(TDPA_INITIAL_BUFFER)
 
 if not HARD_ALERT_INTERVAL_ENABLED: print("Min_Alert_Interval:",MIN_ALERT_INTERVAL)
 else: print("Hard Alert Interval is being used")
@@ -93,8 +95,9 @@ count=0
 send_message("Bot has started")
 
 tpda_last_trigger = {}
-for inter in TDPA_INTERVALS: tpda_last_trigger[inter] = time.time() # Set TDPA interval
- 
+for inter in TDPA_INTERVALS: tpda_last_trigger[inter] = time.time() + TDPA_INITIAL_BUFFER # Set TDPA interval
+print("TDPA Initial Buffer:",TDPA_INITIAL_BUFFER,"seconds") 
+
 while True:
     count+=1
     if PRINT_DEBUG: print("Extracting after",EXTRACT_INTERVAL,'s')
