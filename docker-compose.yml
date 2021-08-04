@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  binance-pump-alerts:
+    build:
+      context: .
+      dockerfile: "./Dockerfile"
+      args:
+        - TELEGRAM_TOKEN=1234567890:AABbCcdefFg-1ihj3klN-5mnO-P8qRSTuvw # Insert token obtained from @BotFather here
+        - TELEGRAM_CHAT_ID=12345678 # Insert Chat ID
+    image: binance-pump-alerts
+    # image: brianleect/binance-pump-alerts:latest
+    restart: unless-stopped
