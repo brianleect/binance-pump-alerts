@@ -3,7 +3,7 @@ import time
 from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, tpdpa_chat_id,\
      FUTURE_ENABLED, DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL,\
-     PUMP_EMOJI, DUMP_EMOJI
+     PUMP_EMOJI, DUMP_EMOJI, TDPA_EMOJI
 from time import sleep
 import telegram as telegram
 
@@ -80,7 +80,7 @@ def getPercentageChange(asset_dict):
                 asset_dict['last_triggered'] = time.time() # Updates last triggered time for MIN_ALERT_INTERVAL
                 asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time for HARD_ALERT_INTERVAL
                 if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) 
-                send_message(PUMP_EMOJI+" PUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) 
+                send_message(PUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
                 # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining intervals
                 return asset_dict # Prevents continuation of checking other intervals
             
@@ -88,7 +88,7 @@ def getPercentageChange(asset_dict):
                 asset_dict['last_triggered'] = time.time() # Updates last triggered time for MIN_ALERT_INTERVAL
                 asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time for HARD_ALERT_INTERVAL
                 if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) 
-                send_message(DUMP_EMOJI+" DUMP: "+asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1]) + ' / Interval: '+str(inter)) 
+                send_message(DUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
                 return asset_dict # Prevents continuation of checking other intervals
             
     return asset_dict
@@ -96,7 +96,7 @@ def getPercentageChange(asset_dict):
 def topPumpDump(last_trigger_pd,full_asset):
     for inter in last_trigger_pd:
         if time.time() > last_trigger_pd[inter] + durationToSeconds(inter) + 8:
-            msg = ''
+            msg = TDPA_EMOJI+'\n'
             msg += 'Interval: ' + inter + '\n\n'
             if TOP_PUMP_ENABLED:
                 pump_sorted_list = sorted(full_asset, key = lambda i: i[inter],reverse=True)[0:VIEW_NUMBER]
