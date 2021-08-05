@@ -3,7 +3,7 @@ import time
 from params import TOP_DUMP_ENABLED, VIEW_NUMBER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, tpdpa_chat_id,\
      FUTURE_ENABLED, DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, TOP_DUMP_ENABLED, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL,\
-     PUMP_EMOJI, DUMP_EMOJI, TDPA_EMOJI
+     PUMP_EMOJI, DUMP_EMOJI, TDPA_EMOJI, ADDITIONAL_STATS_ENABLED
 from time import sleep
 import telegram as telegram
 
@@ -94,6 +94,22 @@ def getPercentageChange(asset_dict):
             
     return asset_dict
 
+def getAdditionalStatistics(full_asset,inter): # Net Up, Down & Full Asset 
+    sum_change = 0
+    up = 0
+    down = 0
+    for asset in full_asset:
+        if asset[inter] > 0: up += 1
+        elif asset[inter] < 0: down += 1
+
+        sum_change += asset[inter]
+    
+    msg = ''
+    avg_change = round((sum_change*100)/len(full_asset),2)
+    msg += 'Average Change: ' + str(avg_change) + '%' + '\n'
+    msg += PUMP_EMOJI + ' ' + str(up) + ' / ' + DUMP_EMOJI + ' ' + str(down)
+    return msg
+
 def topPumpDump(last_trigger_pd,full_asset):
     for inter in last_trigger_pd:
         if time.time() > last_trigger_pd[inter] + durationToSeconds(inter) + 8:
@@ -116,6 +132,9 @@ def topPumpDump(last_trigger_pd,full_asset):
                 for asset in dump_sorted_list: 
                     print(asset['symbol'],':',asset[inter])
                     msg += str(asset['symbol']) + ': ' + str(round(asset[inter]*100,2)) + '%\n'
+
+            if ADDITIONAL_STATS_ENABLED:
+                msg += '\n' + getAdditionalStatistics(full_asset,inter)
 
             send_message(msg,isTPDA=True)
             
