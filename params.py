@@ -25,6 +25,7 @@ DUMP_ENABLED = True # Determine whether to look at DUMP
 # Top Pump & Dump Feature Params
 TOP_PUMP_ENABLED = True # Set to false if not interested in top pump info
 TOP_DUMP_ENABLED = True # Set to false if not interested in top dump info
+ADDITIONAL_STATS_ENABLED = True # Set to false if not interested in net movement of coins
 VIEW_NUMBER = 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
 TDPA_INTERVALS = ['3h'] # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
 
