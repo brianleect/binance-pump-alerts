@@ -39,6 +39,7 @@ for asset in data:
     tmp_dict['price'] = [] # Initialize empty price array
     tmp_dict['lt_dict'] = {} # Used for HARD_ALERT_INTERVAL
     tmp_dict['last_triggered'] = time.time() # Used for MIN_ALERT_INTERVAL
+    tmp_dict['lt_price'] = 0 # Last triggered price for alert
 
     print("Added symbol:",symbol)
     for interval in intervals:
