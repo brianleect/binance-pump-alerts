@@ -26,11 +26,12 @@ DUMP_ENABLED = True # Determine whether to look at DUMP
 TOP_PUMP_ENABLED = True # Set to false if not interested in top pump info
 TOP_DUMP_ENABLED = True # Set to false if not interested in top dump info
 VIEW_NUMBER = 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
-TDPA_INTERVALS = ['1h','3h','6h'] # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
+TDPA_INTERVALS = ['3h'] # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
 
 # Visual Params
 PUMP_EMOJI = '\U0001F7E2' #	🟢 or '\U0001F4B9' 💹 
 DUMP_EMOJI = '\U0001F534' # 🔴 or '\U0001F4C9' 📉
+TDPA_EMOJI = '\U0001F3C6' # 🏆
 
 # Debug Params (Avoid touching it if there's no issues)
 PRINT_DEBUG = True # If false we do not print messages
