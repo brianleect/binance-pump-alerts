@@ -74,21 +74,22 @@ def getPercentageChange(asset_dict):
             break # Skip checking for period since last triggered
         else: 
             change = round((asset_dict['price'][-1] - asset_dict['price'][-1-data_points]) / asset_dict['price'][-1],5)
+            lt_change = round((asset_dict['price'][-1] - asset_dict['lt_price']) / asset_dict['price'][-1],5) # Gets % change from last alert trigger
             asset_dict[inter] = change # Stores change for the interval into asset dict (Used for top pump/dumps)
-
-            if change >= outlier_param[inter]:
-                asset_dict['last_triggered'] = time.time() # Updates last triggered time for MIN_ALERT_INTERVAL
-                asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time for HARD_ALERT_INTERVAL
-                if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) 
-                send_message(PUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
-                # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining intervals
-                return asset_dict # Prevents continuation of checking other intervals
             
-            elif DUMP_ENABLED and -change >= outlier_param[inter]:
+            if abs(change) >= outlier_param[inter] and abs(lt_change) >= outlier_param[inter]:
+                asset_dict['lt_price'] = asset_dict['price'][-1] # Updates last triggerd price
                 asset_dict['last_triggered'] = time.time() # Updates last triggered time for MIN_ALERT_INTERVAL
                 asset_dict['lt_dict'][inter] = time.time() # Updates last triggered time for HARD_ALERT_INTERVAL
-                if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) 
-                send_message(DUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
+                
+                if change > 0:
+                    if PRINT_DEBUG: print("PUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'/% Price:',asset_dict['price'][-1],'Interval:',inter) 
+                    send_message(PUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
+                elif DUMP_ENABLED:
+                    if PRINT_DEBUG: print("DUMP:",asset_dict['symbol'],'/ Change:',round(change*100,2),'% / Price:',asset_dict['price'][-1],'Interval:',inter) 
+                    send_message(DUMP_EMOJI+" Interval: " +str(inter) + " - " +asset_dict['symbol']+' / Change: '+str(round(change*100,2))+'% / Price: '+str(asset_dict['price'][-1])) 
+
+                # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining intervals
                 return asset_dict # Prevents continuation of checking other intervals
             
     return asset_dict
