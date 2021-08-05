@@ -40,3 +40,4 @@ RESET_INTERVAL = '12h' # Interval for clearing array to prevent MEM ERROR can ha
 GET_PRICE_FAIL_INTERVAL = '1s' # In the case of get price fail, this is the time delay before re-attempt
 SEND_TELEGRAM_FAIL_INTERVAL = '1s' # If telegram message fails to send, this is the time delay before re-attempt
 TDPA_INITIAL_BUFFER = '5m'
+CHECK_NEW_LISTINGS_ENABLED = True # Set to false for debugging only

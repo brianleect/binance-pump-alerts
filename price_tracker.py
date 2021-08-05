@@ -4,7 +4,7 @@ import telegram as telegram
 from params import TDPA_INITIAL_BUFFER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL,\
-     TDPA_INITIAL_BUFFER
+     TDPA_INITIAL_BUFFER, CHECK_NEW_LISTINGS_ENABLED
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
 import datetime
@@ -64,6 +64,9 @@ def checkNewListings(data_t):
     global init_data
 
     if len(init_data) != len(data_t):
+
+        if len(init_data) > len(data_t): return # If init_data has more than data_t we just ignore it
+
         send_message(str(len(data_t)-len(init_data))+" new pairs found, adding to monitored list")
 
         init_symbols = [asset['symbol'] for asset in init_data]
@@ -105,7 +108,7 @@ while True:
     start_time = time.time()
     data = getPrices()
 
-    checkNewListings(data)
+    if CHECK_NEW_LISTINGS_ENABLED: checkNewListings(data)
     checkTimeSinceReset() # Clears logs if pass a certain time
     
     for asset in full_data:
