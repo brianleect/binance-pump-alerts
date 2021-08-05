@@ -105,7 +105,7 @@ def getAdditionalStatistics(full_asset,inter): # Net Up, Down & Full Asset
         sum_change += asset[inter]
     
     msg = ''
-    avg_change = round(sum_change/len(full_asset),5)
+    avg_change = round((sum_change*100)/len(full_asset),2)
     msg += 'Average Change: ' + str(avg_change) + '%' + '\n'
     msg += PUMP_EMOJI + ' ' + str(up) + ' / ' + DUMP_EMOJI + ' ' + str(down)
     return msg
