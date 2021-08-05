@@ -96,8 +96,8 @@ def getPercentageChange(asset_dict):
 def topPumpDump(last_trigger_pd,full_asset):
     for inter in last_trigger_pd:
         if time.time() > last_trigger_pd[inter] + durationToSeconds(inter) + 8:
-            msg = TDPA_EMOJI+'\n'
-            msg += 'Interval: ' + inter + '\n\n'
+            msg = TDPA_EMOJI
+            msg += ' Interval: ' + inter + '\n\n'
             if TOP_PUMP_ENABLED:
                 pump_sorted_list = sorted(full_asset, key = lambda i: i[inter],reverse=True)[0:VIEW_NUMBER]
                 msg += 'Top ' + str(VIEW_NUMBER) + ' PUMP\n'
