@@ -1,10 +1,10 @@
 import requests
 import time
 import telegram as telegram
-from params import TDPA_INITIAL_BUFFER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
+from params import DUMP_EMOJI, TDPA_INITIAL_BUFFER, outlier_param, intervals, watchlist, pairs_of_interest, token, chat_id, FUTURE_ENABLED,\
      DUMP_ENABLED, RESET_INTERVAL, PRINT_DEBUG, EXTRACT_INTERVAL, GET_PRICE_FAIL_INTERVAL,\
      SEND_TELEGRAM_FAIL_INTERVAL, TOP_PUMP_ENABLED, VIEW_NUMBER, TDPA_INTERVALS, HARD_ALERT_INTERVAL_ENABLED, MIN_ALERT_INTERVAL,\
-     TDPA_INITIAL_BUFFER, CHECK_NEW_LISTINGS_ENABLED
+     TDPA_INITIAL_BUFFER, CHECK_NEW_LISTINGS_ENABLED, NEW_LISTING_EMOJI, PUMP_EMOJI, DUMP_EMOJI
 from functions import durationToSeconds, getPrices, send_message, searchSymbol, getPercentageChange, topPumpDump
 from time import sleep
 import datetime
@@ -23,7 +23,7 @@ init_data = data[:] # Used for checking for new listings
 full_data = []
 
 # Initialize full_data
-for asset in data:
+for asset in init_data:
     symbol = asset['symbol']
 
     if len(watchlist) > 0: # Meaning watchlist has variables
@@ -67,15 +67,17 @@ def checkNewListings(data_t):
 
         if len(init_data) > len(data_t): return # If init_data has more than data_t we just ignore it
 
-        send_message(str(len(data_t)-len(init_data))+" new pairs found, adding to monitored list")
-
         init_symbols = [asset['symbol'] for asset in init_data]
         symbols_to_add = [asset['symbol'] for asset in data_t if asset['symbol'] not in init_symbols ]
         
+        msg = NEW_LISTING_EMOJI + ' New Listings' +'\n\n'
+        msg += str(len(data_t)-len(init_data))+" new pairs found, adding to monitored list" + '\n\n'
+        msg += "Pairs\n"
+
         for symbol in symbols_to_add:
 
             if symbol[-4:] not in pairs_of_interest and symbol[-3:] not in pairs_of_interest: 
-                send_message("(New Listing) Ignoring: "+symbol+" as not in pair of interest") # Ignores pairs not specified
+                msg += DUMP_EMOJI+" Ignore: "+symbol+" \n" # Ignores pairs not specified
                 continue 
 
             tmp_dict = {}
@@ -83,9 +85,10 @@ def checkNewListings(data_t):
             tmp_dict['price'] = [] # Initialize empty price array
             tmp_dict['lt_dict'] = {} # Used for HARD_ALERT_INTERVAL
             tmp_dict['last_triggered'] = time.time() # Used for MIN_ALERT_INTERVAL
+            tmp_dict['lt_price'] = 0 # Last triggered price for alert
 
             print("Added symbol:",symbol)
-            send_message("Added symbol: "+symbol)
+            msg += PUMP_EMOJI + " Add: "+symbol+'\n'
 
             for interval in intervals:
                 tmp_dict[interval] = 0
@@ -93,6 +96,7 @@ def checkNewListings(data_t):
             
             full_data.append(tmp_dict)
 
+        send_message(msg) # Sends combined message
         init_data = data_t[:] # Updates init data 
 
 count=0

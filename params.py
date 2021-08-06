@@ -33,6 +33,7 @@ TDPA_INTERVALS = ['3h'] # Intervals for top pump and dump to be sent, Ensure its
 PUMP_EMOJI = '\U0001F7E2' #	🟢 or '\U0001F4B9' 💹 
 DUMP_EMOJI = '\U0001F534' # 🔴 or '\U0001F4C9' 📉
 TDPA_EMOJI = '\U0001F3C6' # 🏆
+NEW_LISTING_EMOJI = '\U0001F4F0' # 📰 
 
 # Debug Params (Avoid touching it if there's no issues)
 PRINT_DEBUG = True # If false we do not print messages
