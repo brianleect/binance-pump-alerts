@@ -4,7 +4,7 @@ Simple application which gets price data from binance API and sends telegram mes
 
 Working demo telegram channel: https://t.me/binance_pump_alerts (Hosted on AWS ec2 running latest version 24/7) 
 
-![image](https://user-images.githubusercontent.com/63389110/127960171-fb5dbd52-1bc7-4f60-af30-8536e840235b.png)
+![image](https://user-images.githubusercontent.com/63389110/128601355-4be90b36-5e54-4be6-bf85-00fc395645de.png)
 
 
 ## Usage
@@ -61,3 +61,4 @@ For params not indicated above, refer to comments besides parameter for its use.
 9. [Test] Volume Change Updates (TEST_VOL version)
 10. Allows long period of running without MEM ERROR
 11. Send periodic Top X dumped / pumped coins
+12. Docker Integration (Thanks to @patbaumgartner)
