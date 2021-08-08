@@ -21,8 +21,8 @@ def durationToSeconds(duration):
     return int(duration[:-1]) * unit
 
 
-def sendMessage(message, isTPDA=False):
-    if isTPDA:
+def sendMessage(message, isAlertChat=False):
+    if isAlertChat:
         if config["telegramAlertChatId"] == 0:
             chatId = config["telegramChatId"]
         else:
@@ -36,7 +36,7 @@ def sendMessage(message, isTPDA=False):
             break
         except:
             logger.error(
-                "Retrying to send tele message in %ss.",
+                "Retrying to send telegram message in %ss.",
                 config["telegramRetryInterval"],
             )
             sleep(config["telegramRetryInterval"])
@@ -213,7 +213,7 @@ def topPumpDump(last_trigger_pd, full_asset):
                     )
             if config["additionalStatsEnabled"]:
                 msg += "\n" + getAdditionalStatistics(full_asset, inter)
-            sendMessage(msg, isTPDA=True)
+            sendMessage(msg, isAlertChat=True)
 
             last_trigger_pd[inter] = time.time()  # Update time for trigger
     else:
