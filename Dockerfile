@@ -35,9 +35,6 @@ RUN  pip install --user --no-cache-dir -r requirements.txt
 # Copy dependencies to runtime-image
 FROM base as runtime-image
 
-ARG TELEGRAM_TOKEN
-ARG TELEGRAM_CHAT_ID
-
 COPY --from=python-deps /usr/local/lib /usr/local/lib
 ENV LD_LIBRARY_PATH /usr/local/lib
 
@@ -47,8 +44,7 @@ USER bpauser
 
 COPY --chown=bpauser:bpauser . /binance-pump-alerts/
 
-RUN sed -i "s/token = ''/token = '${TELEGRAM_TOKEN}'/g" /binance-pump-alerts/params.py
-RUN sed -i "s/chat_id = 0/chat_id = ${TELEGRAM_CHAT_ID}/g" /binance-pump-alerts/params.py
+ENTRYPOINT ["./entrypoint.sh", "python", "pumpAlerts.py"]
 
-ENTRYPOINT ["python"]
-CMD ["price_tracker.py"]
+# Entrypoint for debugging purposes
+# ENTRYPOINT ["tail", "-f", "/dev/null"]

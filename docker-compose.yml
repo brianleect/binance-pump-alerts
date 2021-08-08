@@ -5,9 +5,11 @@ services:
     build:
       context: .
       dockerfile: "./Dockerfile"
-      args:
-        - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-        - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
     image: binance-pump-alerts
     # image: brianleect/binance-pump-alerts:latest
     restart: unless-stopped
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - PUMP_EMOJI=${PUMP_EMOJI}
+      - DUMP_EMOJI=${DUMP_EMOJI}

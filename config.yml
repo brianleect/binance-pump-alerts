@@ -1,0 +1,75 @@
+# Main params
+
+chartIntervals:
+  - 1s
+  - 5s
+  - 15s
+  - 30s
+  - 1m
+  - 5m
+  - 15m
+  - 30m
+  - 1h
+  - 3h
+  - 6h
+
+outlierParams:
+  "1s": 0.02
+  "5s": 0.05
+  "15s": 0.06
+  "30s": 0.08
+  "1m": 0.1
+  "5m": 0.10
+  "15m": 0.15
+  "30m": 0.20
+  "1h": 0.30
+  "3h": 0.4
+  "6h": 0.5
+
+pairsOfInterest: # Other options include 'BTC' , 'ETH'
+  - USDT
+
+# Used for telegram bot updates
+telegramToken: mySecretToken # Insert telegramToken obtained from @BotFather here
+telegramChatId: mySecretChatId # Insert Chat ID
+telegramAlertChatId: 0 # Insert Chat ID for top pump dump alert, if left at 0 it'll send to telegramChatId
+
+# Useful Params
+extractInterval: 1s # Interval between each price extract
+
+# Alert Interval Params
+hardAlertIntervalEnabled: True # If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
+hardAlertMin: 5m # Minimum interval between each alert. Only will be utlized when hardAlertIntervalEnabled is False.
+
+# Optional Watchlist only mode
+# watchlist:  # E.g. 'ADAUSDT', 'ETHUSDT' # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
+#   - ADAUSDT
+#   - ETHUSDT
+
+# Feature params
+futuresEnabled: False # Determine whether to look at future markets
+dumpEnabled: True # Determine whether to look at DUMP
+
+# Top Pump & Dump Feature Params
+topPumpEnabled: True # Set to false if not interested in top pump info
+topDumpEnabled: True # Set to false if not interested in top dump info
+additionalStatsEnabled: True # Set to false if not interested in net movement of coins
+viewNumber: 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
+tdpaIntervals: # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
+  - "1h"
+  - "3h"
+
+# Visual Params
+botEmoji: ! "\U0001F916" # 🤖
+pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4B9' 💹
+dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉
+tdpaEmoji: ! "\U0001F3C6" # 🏆
+newListingEmoji: ! "\U0001F4F0" # 📰
+
+# Debug Params (Avoid touching it if there's no issues)
+debug: True # If false we do not print messages
+resetInterval: 12h # Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
+priceRetryInterval: 1s # In the case of get price fail, this is the time delay before re-attempt
+telegramRetryInterval: 1s # If telegram message fails to send, this is the time delay before re-attempt
+tdpaInitialBuffer: 5m
+checkNewListingEnabled: True # Set to false for debugging only
