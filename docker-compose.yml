@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   binance-pump-alerts:
@@ -13,3 +13,4 @@ services:
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - PUMP_EMOJI=${PUMP_EMOJI}
       - DUMP_EMOJI=${DUMP_EMOJI}
+      - DEBUG=${DEBUG}

@@ -1,3 +1,4 @@
+import colorlog, logging
 import sys, os
 import datetime
 import requests
@@ -20,8 +21,8 @@ def durationToSeconds(duration):
     return int(duration[:-1]) * unit
 
 
-def sendMessage(message, isTPDA=False):
-    if isTPDA:
+def sendMessage(message, isAlertChat=False):
+    if isAlertChat:
         if config["telegramAlertChatId"] == 0:
             chatId = config["telegramChatId"]
         else:
@@ -34,10 +35,9 @@ def sendMessage(message, isTPDA=False):
             bot.send_message(chat_id=chatId, text=message)
             break
         except:
-            print(
-                "Retrying to send tele message in",
+            logger.error(
+                "Retrying to send telegram message in %ss.",
                 config["telegramRetryInterval"],
-                "s",
             )
             sleep(config["telegramRetryInterval"])
 
@@ -54,8 +54,8 @@ def getPrices():
             data = requests.get(url).json()
             return data
         except Exception as e:
-            print("Error: ", e)
-            print("Retrying in", config["priceRetryInterval"], "s")
+            logger.error("Issue occured while getting prices. Error: %s.", e)
+            logger.error("Retrying in %ss", config["priceRetryInterval."])
             sleep(config["priceRetryInterval"])  # Keeps trying every 0.5s
 
 
@@ -75,7 +75,7 @@ def getPercentageChange(asset_dict):
         elif config["hardAlertIntervalEnabled"] and (
             time.time() - asset_dict["lt_dict"][inter] < durationToSeconds(inter)
         ):  # Check for hardAlertIntervalEnabled
-            print("Duration insufficient", asset_dict["symbol"], inter)
+            logger.debug("Duration insufficient %s: %s.", asset_dict["symbol"], inter)
             break  # Skip checking for period since last triggered
         else:
             change = round(
@@ -109,17 +109,13 @@ def getPercentageChange(asset_dict):
                 ] = time.time()  # Updates last triggered time for HARD_ALERT_INTERVAL
 
                 if change > 0:
-                    if config["debug"]:
-                        print(
-                            "PUMP: ",
-                            asset_dict["symbol"],
-                            "/ Change: ",
-                            round(change * 100, 2),
-                            "/% Price: ",
-                            asset_dict["price"][-1],
-                            "Interval: ",
-                            inter,
-                        )
+                    logger.debug(
+                        "PUMP: %s / Change: %s \% / Price: %s / Interval: %s.",
+                        asset_dict["symbol"],
+                        round(change * 100, 2),
+                        asset_dict["price"][-1],
+                        inter,
+                    )
                     sendMessage(
                         config["pumpEmoji"]
                         + " Interval: "
@@ -132,17 +128,13 @@ def getPercentageChange(asset_dict):
                         + str(asset_dict["price"][-1])
                     )
                 elif config["dumpEnabled"]:
-                    if config["debug"]:
-                        print(
-                            "DUMP: ",
-                            asset_dict["symbol"],
-                            "/ Change: ",
-                            round(change * 100, 2),
-                            "% / Price: ",
-                            asset_dict["price"][-1],
-                            "Interval: ",
-                            inter,
-                        )
+                    logger.debug(
+                        "DUMP: %s / Change: %s \% / Price: %s / Interval: %s.",
+                        asset_dict["symbol"],
+                        round(change * 100, 2),
+                        asset_dict["price"][-1],
+                        inter,
+                    )
                     sendMessage(
                         config["dumpEmoji"]
                         + " Interval: "
@@ -195,9 +187,9 @@ def topPumpDump(last_trigger_pd, full_asset):
                     full_asset, key=lambda i: i[inter], reverse=True
                 )[0 : config["viewNumber"]]
                 msg += "Top " + str(config["viewNumber"]) + " PUMP\n"
-                print("Top", config["viewNumber"], "PUMP")
+                logger.info("Top %s PUMP", config["viewNumber"])
                 for asset in pump_sorted_list:
-                    print(asset["symbol"], ": ", asset[inter])
+                    logger.info("%s : %s", asset["symbol"], asset[inter])
                     msg += (
                         str(asset["symbol"])
                         + ": "
@@ -209,10 +201,10 @@ def topPumpDump(last_trigger_pd, full_asset):
                 dump_sorted_list = sorted(full_asset, key=lambda i: i[inter])[
                     0 : config["viewNumber"]
                 ]
-                print("Top", config["viewNumber"], "DUMP")
+                logger.info("Top %s DUMP", config["viewNumber"])
                 msg += "Top " + str(config["viewNumber"]) + " DUMP\n"
                 for asset in dump_sorted_list:
-                    print(asset["symbol"], ": ", asset[inter])
+                    logger.info("%s : %s", asset["symbol"], asset[inter])
                     msg += (
                         str(asset["symbol"])
                         + ": "
@@ -221,7 +213,7 @@ def topPumpDump(last_trigger_pd, full_asset):
                     )
             if config["additionalStatsEnabled"]:
                 msg += "\n" + getAdditionalStatistics(full_asset, inter)
-            sendMessage(msg, isTPDA=True)
+            sendMessage(msg, isAlertChat=True)
 
             last_trigger_pd[inter] = time.time()  # Update time for trigger
     else:
@@ -231,12 +223,8 @@ def topPumpDump(last_trigger_pd, full_asset):
 def checkTimeSinceReset():  # Used to solve MEM ERROR bug
     global init_time
     global full_data
-    if time.time() - init_time > durationToSeconds(
-        config["resetInterval"]
-    ):  # Clear arrays every 3 hours
-        print(
-            "Emptying data to prevent mem error"
-        )  # Logs to console only, reduces spam
+    if time.time() - init_time > durationToSeconds(config["resetInterval"]):
+        logger.debug("Emptying data to prevent mem errors.")
         for asset in full_data:
             asset["price"] = []  # Empty price array
         init_time = time.time()
@@ -281,7 +269,7 @@ def checkNewListings(data_t):
             tmp_dict["last_triggered"] = time.time()  # Used for config['hardAlertMin']
             tmp_dict["lt_price"] = 0  # Last triggered price for alert
 
-            print("Added symbol: ", symbol)
+            logger.info("Added symbol: %s.", symbol)
             msg += config["pumpEmoji"] + " Add: " + symbol + "\n"
 
             for interval in config["chartIntervals"]:
@@ -297,15 +285,31 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 yaml_file = open(os.path.join(__location__, "config.yml"), "r", encoding="utf-8")
 config = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
-if config["debug"]:
-    print("Config: ", config)
+# Define the log format
+log_format = "[%(asctime)s] %(levelname)-8s %(name)-25s %(message)s"
+
+bold_seq = "\033[1m"
+colorlog_format = f"{bold_seq} " "%(log_color)s " f"{log_format}"
+colorlog.basicConfig(
+    # Define logging level according to the configuration
+    level=logging.DEBUG if config["debug"] == True else logging.INFO,
+    # Declare the object we created to format the log messages
+    format=colorlog_format,
+    # Declare handlers for the Console
+    handlers=[logging.StreamHandler()],
+)
+
+# Define your own logger name
+logger = logging.getLogger("binance-pump-alerts")
+
+# Logg whole configuration during the startup
+logger.debug("Config: %s", config)
 
 # Initialize telegram bot
 try:
     bot = Bot(token=config["telegramToken"])
 except Exception as e:
-    print("Error initializing Telegram bot")
-    print(e)
+    logger.error("Error initializing Telegram bot. Exception: %s.", e)
     quit()
 
 init_dateTime = datetime.datetime.now()
@@ -318,17 +322,20 @@ config["hardAlertMin"] = durationToSeconds(config["hardAlertMin"])
 config["tdpaInitialBuffer"] = durationToSeconds(config["tdpaInitialBuffer"])
 
 if not config["hardAlertIntervalEnabled"]:
-    print("config['hardAlertMin']: ", config["hardAlertMin"])
+    logger.debug("Parameter hardAlertMin set to: %s.", config["hardAlertMin"])
 else:
-    print("Hard Alert Interval is being used")
+    logger.info("Hard Alert Interval is being used.")
 
-print("Extract interval: ", config["extractInterval"])
+logger.debug("Parameter extractInterval set to: %s.", config["extractInterval"])
 
 # Choose whether we look at spot prices or future prices
 if config["futuresEnabled"]:
     url = "https://fapi.binance.com/fapi/v1/ticker/price"
+    logger.debug("Using Futures API with url set to: %s.", url)
 else:
     url = "https://api.binance.com/api/v3/ticker/price"
+    logger.debug("Using Spot API with url set to: %s.", url)
+
 
 data = getPrices()
 init_data = data[:]  # Used for checking for new listings
@@ -350,7 +357,7 @@ for asset in init_data:
             or ("BULL" in symbol)
             or ("BEAR" in symbol)
         ) and ("SUPER" not in symbol):
-            print("Ignoring: ", symbol)
+            logger.info("Ignoring symbol: %s.", symbol)
             continue  # Remove leveraged config['telegramToken']s
         if (
             symbol[-4:] not in config["pairsOfInterest"]
@@ -364,14 +371,13 @@ for asset in init_data:
     tmp_dict["last_triggered"] = time.time()  # Used for config['hardAlertMin']
     tmp_dict["lt_price"] = 0  # Last triggered price for alert
 
-    print("Added symbol: ", symbol)
+    logger.debug("Added symbol: %s.", symbol)
     for interval in config["chartIntervals"]:
         tmp_dict[interval] = 0
         tmp_dict["lt_dict"][interval] = time.time()
     full_data.append(tmp_dict)
 
-print("Following", len(full_data), "pairs")
-
+logger.info("Following %s pairs.", len(full_data))
 sendMessage(config["botEmoji"] + " Bot has started")
 
 tpda_last_trigger = {}
@@ -379,11 +385,10 @@ for inter in config["tdpaIntervals"]:
     tpda_last_trigger[inter] = (
         time.time() + config["tdpaInitialBuffer"]
     )  # Set TDPA interval
-print("TDPA Initial Buffer: ", config["tdpaInitialBuffer"], "seconds")
+logger.info("TDPA Initial Buffer: %ss.", config["tdpaInitialBuffer"])
 
 while True:
-    if config["debug"]:
-        print("Extracting after", config["extractInterval"], "s")
+    logger.debug("Extracting after %ss.", config["extractInterval"])
     start_time = time.time()
     data = getPrices()
 
@@ -398,13 +403,12 @@ while True:
         asset = getPercentageChange(asset)
     topPumpDump(tpda_last_trigger, full_data)  # Triggers check for top_pump_dump
 
-    if config["debug"]:
-        print(
-            "Extract time: ",
-            time.time() - start_time,
-            "/ Time ran: ",
-            datetime.datetime.now() - init_dateTime,
-        )
+    logger.debug(
+        "Extract time: %s / Time ran: %s.",
+        time.time() - start_time,
+        datetime.datetime.now() - init_dateTime,
+    )
+
     while time.time() - start_time < config["extractInterval"]:
         sleep(
             config["extractInterval"] - time.time() + start_time
