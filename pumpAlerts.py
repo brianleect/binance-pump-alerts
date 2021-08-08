@@ -282,7 +282,7 @@ def checkNewListings(data_t):
 
 # Read config
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-yaml_file = open(os.path.join(__location__, "config.yml"), "r")
+yaml_file = open(os.path.join(__location__, "config.yml"), "r", encoding="utf-8")
 config = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
 # Define the log format
