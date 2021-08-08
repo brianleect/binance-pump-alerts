@@ -1,6 +1,6 @@
 # Main params
 
-chartIntervals:
+chartIntervals: # Intervals which are monitored
   - 1s
   - 5s
   - 15s
@@ -13,7 +13,7 @@ chartIntervals:
   - 3h
   - 6h
 
-outlierParams:
+outlierParams: # % value at which an alert is triggered. Ensure interval exists in chartIntervals as well
   "1s": 0.02
   "5s": 0.05
   "15s": 0.06
@@ -31,11 +31,11 @@ pairsOfInterest: # Other options include 'BTC' , 'ETH'
 
 # Used for telegram bot updates
 telegramToken: mySecretToken # Insert telegramToken obtained from @BotFather here
-telegramChatId: mySecretChatId # Insert Chat ID
+telegramChatId: mySecretChatId # Insert Chat ID obtained from @get_id_bot here
 telegramAlertChatId: 0 # Insert Chat ID for top pump dump alert, if left at 0 it'll send to telegramChatId
 
 # Useful Params
-extractInterval: 1s # Interval between each price extract
+extractInterval: 1s # Interval between each price extract from Binance REST API
 
 # Alert Interval Params
 hardAlertIntervalEnabled: True # If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
@@ -71,5 +71,5 @@ debug: False # If false we do not print messages
 resetInterval: 12h # Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
 priceRetryInterval: 1s # In the case of get price fail, this is the time delay before re-attempt
 telegramRetryInterval: 1s # If telegram message fails to send, this is the time delay before re-attempt
-tdpaInitialBuffer: 5m
-checkNewListingEnabled: True # Set to false for debugging only
+tdpaInitialBuffer: 5m # Initial buffer before we trigger TDPA. Prevents all 0% lack of data points
+checkNewListingEnabled: True # Disables checking and adding of new listing pairs
