@@ -1,5 +1,4 @@
+colorlog
 requests
 pyyaml
 python-telegram-bot
-
-colorlog

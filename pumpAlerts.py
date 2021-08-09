@@ -1,12 +1,11 @@
 import colorlog, logging
 import sys, os
-import datetime
 import requests
 import time
 import yaml
 
-from telegram import Bot
 from time import sleep
+from sender import TelegramSender
 
 
 def durationToSeconds(duration):
@@ -21,263 +20,262 @@ def durationToSeconds(duration):
     return int(duration[:-1]) * unit
 
 
-def sendMessage(message, isAlertChat=False):
-    if isAlertChat:
-        if config["telegramAlertChatId"] == 0:
-            chatId = config["telegramChatId"]
-        else:
-            chatId = config["telegramAlertChatId"]
-    else:
-        chatId = config["telegramChatId"]
-
-    while True:
-        try:
-            bot.send_message(chat_id=chatId, text=message)
-            break
-        except:
-            logger.error(
-                "Retrying to send telegram message in %ss.",
-                config["telegramRetryInterval"],
-            )
-            sleep(config["telegramRetryInterval"])
-
-
-def searchSymbol(symbol_name, data):
-    for asset in data:
-        if asset["symbol"] == symbol_name:
+def exctractTickerData(symbol, assets):
+    for asset in assets:
+        if asset["symbol"] == symbol:
             return asset
 
 
-def getPrices():
+def retrieveExchangeAssets(apiUrl, priceRetryIntervalInSeconds):
     while True:
         try:
-            data = requests.get(url).json()
-            return data
-        except Exception as e:
-            logger.error("Issue occured while getting prices. Error: %s.", e)
-            logger.error("Retrying in %ss", config["priceRetryInterval."])
-            sleep(config["priceRetryInterval"])  # Keeps trying every 0.5s
-
-
-def getPercentageChange(asset_dict):
-
-    data_length = len(asset_dict["price"])
-
-    for inter in config["chartIntervals"]:
-        data_points = int(durationToSeconds(inter) / config["extractInterval"])
-
-        if data_points + 1 > data_length:
-            break
-        elif not config["hardAlertIntervalEnabled"] and (
-            time.time() - asset_dict["last_triggered"] < config["hardAlertMin"]
-        ):
-            break  # Skip checking for period since last triggered
-        elif config["hardAlertIntervalEnabled"] and (
-            time.time() - asset_dict["lt_dict"][inter] < durationToSeconds(inter)
-        ):  # Check for hardAlertIntervalEnabled
-            logger.debug("Duration insufficient %s: %s.", asset_dict["symbol"], inter)
-            break  # Skip checking for period since last triggered
-        else:
-            change = round(
-                (asset_dict["price"][-1] - asset_dict["price"][-1 - data_points])
-                / asset_dict["price"][-1],
-                5,
+            logger.debug(
+                "Retrieving price information from the ticker. ApiUrl: %s.", apiUrl
             )
-            lt_change = round(
-                (asset_dict["price"][-1] - asset_dict["lt_price"])
-                / asset_dict["price"][-1],
-                5,
-            )  # Gets % change from last alert trigger
-            asset_dict[
-                inter
-            ] = change  # Stores change for the interval into asset dict (Used for top pump/dumps)
-
-            if (
-                abs(change) >= config["outlierParams"][inter]
-                and abs(lt_change) >= config["outlierParams"][inter]
-            ):
-                asset_dict["lt_price"] = asset_dict["price"][
-                    -1
-                ]  # Updates last triggerd price
-                asset_dict[
-                    "last_triggered"
-                ] = (
-                    time.time()
-                )  # Updates last triggered time for config['hardAlertMin']
-                asset_dict["lt_dict"][
-                    inter
-                ] = time.time()  # Updates last triggered time for HARD_ALERT_INTERVAL
-
-                if change > 0:
-                    logger.debug(
-                        "PUMP: %s / Change: %s \% / Price: %s / Interval: %s.",
-                        asset_dict["symbol"],
-                        round(change * 100, 2),
-                        asset_dict["price"][-1],
-                        inter,
-                    )
-                    sendMessage(
-                        config["pumpEmoji"]
-                        + " Interval: "
-                        + str(inter)
-                        + " - "
-                        + asset_dict["symbol"]
-                        + " / Change: "
-                        + str(round(change * 100, 2))
-                        + "% / Price: "
-                        + str(asset_dict["price"][-1])
-                    )
-                elif config["dumpEnabled"]:
-                    logger.debug(
-                        "DUMP: %s / Change: %s \% / Price: %s / Interval: %s.",
-                        asset_dict["symbol"],
-                        round(change * 100, 2),
-                        asset_dict["price"][-1],
-                        inter,
-                    )
-                    sendMessage(
-                        config["dumpEmoji"]
-                        + " Interval: "
-                        + str(inter)
-                        + " - "
-                        + asset_dict["symbol"]
-                        + " / Change: "
-                        + str(round(change * 100, 2))
-                        + "% / Price: "
-                        + str(asset_dict["price"][-1])
-                    )
-                # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining config['chartIntervals']
-                return asset_dict  # Prevents continuation of checking other config['chartIntervals']
-    return asset_dict
+            return requests.get(apiUrl).json()
+        except Exception as e:
+            logger.error(
+                "Issue occured while getting prices. Retrying in %ss. Error: %s.",
+                priceRetryIntervalInSeconds,
+                e,
+                exc_info=True,
+            )
+            sleep(priceRetryIntervalInSeconds)
 
 
-def getAdditionalStatistics(full_asset, inter):  # Net Up, Down & Full Asset
-    sum_change = 0
-    up = 0
-    down = 0
-    for asset in full_asset:
-        if asset[inter] > 0:
-            up += 1
-        elif asset[inter] < 0:
-            down += 1
+def isSymbolValid(symbol, watchlist, pairsOfInterest):
+    # Filter symbols not in watchlist if set
+    if len(watchlist) > 0:
+        if symbol not in watchlist:
+            logger.debug("Ignoring symbol not in watchlist: %s.", symbol)
+            return False
 
-        sum_change += asset[inter]
-    msg = ""
-    avg_change = round((sum_change * 100) / len(full_asset), 2)
-    msg += "Average Change: " + str(avg_change) + "%" + "\n"
-    msg += (
-        config["pumpEmoji"]
-        + " "
-        + str(up)
-        + " / "
-        + config["dumpEmoji"]
-        + " "
-        + str(down)
-    )
-    return msg
+    # Removing leverage symbols
+    if (
+        ("UP" in symbol)
+        or ("DOWN" in symbol)
+        or ("BULL" in symbol)
+        or ("BEAR" in symbol)
+    ) and ("SUPER" not in symbol):
+        logger.debug("Ignoring leverage symbol: %s.", symbol)
+        return False
 
+    # Filter pairsOfInterest to reduce the noise. E.g. BUSD, USDT, ETH, BTC
+    if symbol[-4:] not in pairsOfInterest and symbol[-3:] not in pairsOfInterest:
+        logger.debug("Ignoring symbol not in pairsOfInterests: %s.", symbol)
+        return False
 
-def topPumpDump(last_trigger_pd, full_asset):
-    for inter in last_trigger_pd:
-        if time.time() > last_trigger_pd[inter] + durationToSeconds(inter) + 8:
-            msg = config["tdpaEmoji"]
-            msg += " Interval: " + inter + "\n\n"
-            if config["topPumpEnabled"]:
-                pump_sorted_list = sorted(
-                    full_asset, key=lambda i: i[inter], reverse=True
-                )[0 : config["viewNumber"]]
-                msg += "Top " + str(config["viewNumber"]) + " PUMP\n"
-                logger.info("Top %s PUMP", config["viewNumber"])
-                for asset in pump_sorted_list:
-                    logger.info("%s : %s", asset["symbol"], asset[inter])
-                    msg += (
-                        str(asset["symbol"])
-                        + ": "
-                        + str(round(asset[inter] * 100, 2))
-                        + "%\n"
-                    )
-                msg += "\n"
-            if config["dumpEnabled"]:
-                dump_sorted_list = sorted(full_asset, key=lambda i: i[inter])[
-                    0 : config["viewNumber"]
-                ]
-                logger.info("Top %s DUMP", config["viewNumber"])
-                msg += "Top " + str(config["viewNumber"]) + " DUMP\n"
-                for asset in dump_sorted_list:
-                    logger.info("%s : %s", asset["symbol"], asset[inter])
-                    msg += (
-                        str(asset["symbol"])
-                        + ": "
-                        + str(round(asset[inter] * 100, 2))
-                        + "%\n"
-                    )
-            if config["additionalStatsEnabled"]:
-                msg += "\n" + getAdditionalStatistics(full_asset, inter)
-            sendMessage(msg, isAlertChat=True)
-
-            last_trigger_pd[inter] = time.time()  # Update time for trigger
-    else:
-        return last_trigger_pd
+    return True
 
 
-def checkTimeSinceReset():  # Used to solve MEM ERROR bug
-    global init_time
-    global full_data
-    if time.time() - init_time > durationToSeconds(config["resetInterval"]):
-        logger.debug("Emptying data to prevent mem errors.")
-        for asset in full_data:
-            asset["price"] = []  # Empty price array
-        init_time = time.time()
+def filterAndConvertAssets(exchangeAssets, watchlist, pairsOfInterest, chartIntervals):
+    filteredAssets = []
+
+    for exchangeAsset in exchangeAssets:
+        symbol = exchangeAsset["symbol"]
+
+        if isSymbolValid(symbol, watchlist, pairsOfInterest):
+            filteredAssets.append(createNewAsset(symbol, chartIntervals))
+            logger.info("Adding symbol: %s.", symbol)
+
+    return filteredAssets
 
 
-def checkNewListings(data_t):
-    global full_data
-    global init_data
+def createNewAsset(symbol, chartIntervals):
+    now = time.time()
 
-    if len(init_data) != len(data_t):
+    asset = {}
+    asset["symbol"] = symbol
+    asset["price"] = []  # Initialize empty price array
+    asset["lt_dict"] = {}  # Used for hard alert interval
+    asset["lt_time"] = now  # Used for hardAlertMinimum
+    asset["lt_price"] = 0  # Last triggered price for alert
 
-        if len(init_data) > len(data_t):
-            return  # If init_data has more than data_t we just ignore it
+    for interval in chartIntervals:
+        asset[interval] = 0
+        asset["lt_dict"][interval] = now
 
-        init_symbols = [asset["symbol"] for asset in init_data]
-        symbols_to_add = [
-            asset["symbol"] for asset in data_t if asset["symbol"] not in init_symbols
-        ]
+    return asset
 
-        msg = config["newListingEmoji"] + " New Listings" + "\n\n"
-        msg += (
-            str(len(data_t) - len(init_data))
-            + " new pairs found, adding to monitored list"
-            + "\n\n"
+
+def updateAllMonitoredAssetsAndSendMessages(
+    monitoredAssets,
+    exchangeAssets,
+    dumpEnabled,
+    chartIntervals,
+    extractIntervalInSeconds,
+    outlierIntervals,
+    hardAlertMinimumimumInSeconds,
+    hardAlertIntervalEnabled,
+):
+    for asset in monitoredAssets:
+        exchangeAsset = exctractTickerData(asset["symbol"], exchangeAssets)
+        asset["price"].append(float(exchangeAsset["price"]))
+        asset = calculateAssetChangeAndSendMessage(
+            asset,
+            dumpEnabled,
+            chartIntervals,
+            extractIntervalInSeconds,
+            outlierIntervals,
+            hardAlertMinimumimumInSeconds,
+            hardAlertIntervalEnabled,
         )
-        msg += "Pairs\n"
 
-        for symbol in symbols_to_add:
+    return monitoredAssets
 
-            if (
-                symbol[-4:] not in config["pairsOfInterest"]
-                and symbol[-3:] not in config["pairsOfInterest"]
-            ):
-                msg += (
-                    config["dumpEmoji"] + " Ignore: " + symbol + " \n"
-                )  # Ignores pairs not specified
-                continue
-            tmp_dict = {}
-            tmp_dict["symbol"] = symbol
-            tmp_dict["price"] = []  # Initialize empty price array
-            tmp_dict["lt_dict"] = {}  # Used for HARD_ALERT_INTERVAL
-            tmp_dict["last_triggered"] = time.time()  # Used for config['hardAlertMin']
-            tmp_dict["lt_price"] = 0  # Last triggered price for alert
 
-            logger.info("Added symbol: %s.", symbol)
-            msg += config["pumpEmoji"] + " Add: " + symbol + "\n"
+def calculateAssetChangeAndSendMessage(
+    asset,
+    dumpEnabled,
+    chartIntervals,
+    extractIntervalInSeconds,
+    outlierIntervals,
+    hardAlertMinimummumInSeconds,
+    hardAlertIntervalEnabled,
+):
+    assetLength = len(asset["price"])
 
-            for interval in config["chartIntervals"]:
-                tmp_dict[interval] = 0
-                tmp_dict["lt_dict"][interval] = time.time()
-            full_data.append(tmp_dict)
-        sendMessage(msg)  # Sends combined message
-        init_data = data_t[:]  # Updates init data
+    for interval in chartIntervals:
+
+        dataPoints = int(
+            chartIntervals[interval]["intervalInSeconds"] / extractIntervalInSeconds
+        )
+
+        now = time.time()
+
+        if dataPoints >= assetLength:
+            break
+
+        # Skip checking for period since last triggered
+        if not hardAlertIntervalEnabled and (
+            now - asset["lt_time"] < hardAlertMinimummumInSeconds
+        ):
+            break
+
+        # Skip checking for period since last triggered
+        if hardAlertIntervalEnabled and (
+            now - asset["lt_dict"][interval]
+            < chartIntervals[interval]["intervalInSeconds"]
+        ):
+            logger.debug("Duration insufficient %s: %s.", asset["symbol"], interval)
+            break
+
+        # Gets change in % from last alert trigger
+        priceDelta = asset["price"][-1] - asset["price"][-1 - dataPoints]
+        change = priceDelta / asset["price"][-1]
+
+        priceDelta = asset["price"][-1] - asset["lt_price"]
+        ltChange = priceDelta / asset["price"][-1]
+
+        # Stores change for the interval into asset dict (Used for top pump/dumps)
+        asset[interval] = change
+
+        if (
+            abs(change) >= outlierIntervals[interval]
+            and abs(ltChange) >= outlierIntervals[interval]
+        ):
+            # Updates last triggerd price
+            asset["lt_price"] = asset["price"][-1]
+            # Updates last triggered time for hardAlertMinimum
+            asset["lt_time"] = now
+            # Updates last triggered time for hard alert interval
+            asset["lt_dict"][interval] = now
+
+            if change > 0:
+                telegram.sendPumpMessage(
+                    interval,
+                    asset["symbol"],
+                    change,
+                    asset["price"][-1],
+                )
+
+            if change < 0 and dumpEnabled:
+                telegram.sendDumpMessage(
+                    interval,
+                    asset["symbol"],
+                    change,
+                    asset["price"][-1],
+                )
+
+            # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining chartIntervals
+            # Prevents continuation of checking other chartIntervals
+            return asset
+
+    return asset
+
+
+def resetPricesDataWhenDue(assets, initialTimeInSeconds, resetInterval):
+    if time.time() - initialTimeInSeconds > resetInterval:
+        logger.debug("Emptying price data to prevent memory errors.")
+        telegram.sendGenericMessage("Emptying price data to prevent memory errors.")
+        for asset in assets:
+            asset["price"] = []
+
+        initialTimeInSeconds = time.time()
+
+    return initialTimeInSeconds
+
+
+def checkAddNewAssetListings(
+    initialAssets,
+    filteredAssets,
+    exchangeAssets,
+    watchlist,
+    pairsOfInterest,
+    chartIntervals,
+):
+
+    if len(initialAssets) >= len(exchangeAssets):
+        # If initialAssets has more than assets we just ignore it
+        return filteredAssets
+
+    initSymbols = [asset["symbol"] for asset in initialAssets]
+    retrievedSymbolsToAdd = [
+        exchangeAsset["symbol"]
+        for exchangeAsset in exchangeAssets
+        if exchangeAsset["symbol"] not in initSymbols
+    ]
+
+    filteredSymbolsToAdd = []
+    for symbol in retrievedSymbolsToAdd:
+        if isSymbolValid(symbol, watchlist, pairsOfInterest):
+            filteredSymbolsToAdd.append(symbol)
+            filteredAssets.append(createNewAsset(symbol, chartIntervals))
+
+    # Sends combined message
+    telegram.sendNewListingMessage(filteredSymbolsToAdd)
+
+    return filteredAssets
+
+
+def checkToSendTopPumpDumpStatisticsReport(
+    assets,
+    topReportIntervals,
+    topPumpEnabled,
+    topDumpEnabled,
+    additionalStatsEnabled,
+    noOfReportedCoins,
+):
+    for interval in topReportIntervals:
+        if (
+            time.time()
+            > topReportIntervals[interval]["startTime"]
+            + topReportIntervals[interval]["intervalInSeconds"]
+            + 8  # Magic number ;)
+        ):
+            # Update time for new trigger
+            topReportIntervals[interval]["startTime"] = time.time()
+
+            telegram.sendTopPumpDumpStatisticsReport(
+                assets,
+                interval,
+                topPumpEnabled,
+                topDumpEnabled,
+                additionalStatsEnabled,
+                noOfReportedCoins,
+            )
+
+        return topReportIntervals
 
 
 # Read config
@@ -305,112 +303,105 @@ logger = logging.getLogger("binance-pump-alerts")
 # Logg whole configuration during the startup
 logger.debug("Config: %s", config)
 
-# Initialize telegram bot
-try:
-    bot = Bot(token=config["telegramToken"])
-except Exception as e:
-    logger.error("Error initializing Telegram bot. Exception: %s.", e)
-    quit()
+initialTimeInSeconds = time.time()
 
-init_dateTime = datetime.datetime.now()
-init_time = time.time()
+telegram = TelegramSender(
+    token=config["telegramToken"],
+    retryInterval=durationToSeconds(config["telegramRetryInterval"]),
+    chatId=config["telegramChatId"],
+    alertChatId=config["telegramAlertChatId"]
+    if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0
+    else config["telegramChatId"],
+    botEmoji=config["botEmoji"],
+    pumpEmoji=config["pumpEmoji"],
+    dumpEmoji=config["dumpEmoji"],
+    tdpaEmoji=config["tdpaEmoji"],
+    newListingEmoji=config["newListingEmoji"],
+)
 
-config["extractInterval"] = durationToSeconds(config["extractInterval"])
-config["priceRetryInterval"] = durationToSeconds(config["priceRetryInterval"])
-config["telegramRetryInterval"] = durationToSeconds(config["telegramRetryInterval"])
-config["hardAlertMin"] = durationToSeconds(config["hardAlertMin"])
-config["tdpaInitialBuffer"] = durationToSeconds(config["tdpaInitialBuffer"])
+extractIntervalInSeconds = durationToSeconds(config["extractInterval"])
+priceRetryIntervalInSeconds = durationToSeconds(config["priceRetryInterval"])
+hardAlertMinimumimumInSeconds = durationToSeconds(config["hardAlertMinimum"])
+tpdInitialOffsetInSeconds = durationToSeconds(config["tpdInitialOffset"])
+resetIntervalInSeconds = durationToSeconds(config["resetInterval"])
 
-if not config["hardAlertIntervalEnabled"]:
-    logger.debug("Parameter hardAlertMin set to: %s.", config["hardAlertMin"])
-else:
-    logger.info("Hard Alert Interval is being used.")
+chartIntervals = {}
+for interval in config["chartIntervals"]:
+    chartIntervals[interval] = {}
+    chartIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
 
-logger.debug("Parameter extractInterval set to: %s.", config["extractInterval"])
+topReportIntervals = {}
+for interval in config["tpdIntervals"]:
+    topReportIntervals[interval] = {}
+    topReportIntervals[interval]["startTime"] = (
+        initialTimeInSeconds + tpdInitialOffsetInSeconds
+    )
+    topReportIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
 
-# Choose whether we look at spot prices or future prices
-if config["futuresEnabled"]:
-    url = "https://fapi.binance.com/fapi/v1/ticker/price"
-    logger.debug("Using Futures API with url set to: %s.", url)
-else:
-    url = "https://api.binance.com/api/v3/ticker/price"
-    logger.debug("Using Spot API with url set to: %s.", url)
+initialAssets = retrieveExchangeAssets(config["apiUrl"], priceRetryIntervalInSeconds)
 
+filteredAssets = filterAndConvertAssets(
+    initialAssets,
+    [] if "watchlist" not in config else config["watchlist"],
+    config["pairsOfInterest"],
+    config["chartIntervals"],
+)
 
-data = getPrices()
-init_data = data[:]  # Used for checking for new listings
-full_data = []
-
-# Initialize full_data
-for asset in init_data:
-    symbol = asset["symbol"]
-
-    if (
-        "watchlist" in config and len(config["watchlist"]) > 0
-    ):  # Meaning config['watchlist'] has variables
-        if symbol not in config["watchlist"]:
-            continue
-    else:  # If config['watchlist'] is empty we take general variables
-        if (
-            ("UP" in symbol)
-            or ("DOWN" in symbol)
-            or ("BULL" in symbol)
-            or ("BEAR" in symbol)
-        ) and ("SUPER" not in symbol):
-            logger.info("Ignoring symbol: %s.", symbol)
-            continue  # Remove leveraged config['telegramToken']s
-        if (
-            symbol[-4:] not in config["pairsOfInterest"]
-            and symbol[-3:] not in config["pairsOfInterest"]
-        ):
-            continue  # Should focus on usdt pairs to reduce noise
-    tmp_dict = {}
-    tmp_dict["symbol"] = asset["symbol"]
-    tmp_dict["price"] = []  # Initialize empty price array
-    tmp_dict["lt_dict"] = {}  # Used for HARD_ALERT_INTERVAL
-    tmp_dict["last_triggered"] = time.time()  # Used for config['hardAlertMin']
-    tmp_dict["lt_price"] = 0  # Last triggered price for alert
-
-    logger.debug("Added symbol: %s.", symbol)
-    for interval in config["chartIntervals"]:
-        tmp_dict[interval] = 0
-        tmp_dict["lt_dict"][interval] = time.time()
-    full_data.append(tmp_dict)
-
-logger.info("Following %s pairs.", len(full_data))
-sendMessage(config["botEmoji"] + " Bot has started")
-
-tpda_last_trigger = {}
-for inter in config["tdpaIntervals"]:
-    tpda_last_trigger[inter] = (
-        time.time() + config["tdpaInitialBuffer"]
-    )  # Set TDPA interval
-logger.info("TDPA Initial Buffer: %ss.", config["tdpaInitialBuffer"])
-
-while True:
-    logger.debug("Extracting after %ss.", config["extractInterval"])
-    start_time = time.time()
-    data = getPrices()
-
-    if config["checkNewListingEnabled"]:
-        checkNewListings(data)
-    checkTimeSinceReset()  # Clears logs if pass a certain time
-
-    for asset in full_data:
-        symbol = asset["symbol"]
-        sym_data = searchSymbol(symbol, data)
-        asset["price"].append(float(sym_data["price"]))
-        asset = getPercentageChange(asset)
-    topPumpDump(tpda_last_trigger, full_data)  # Triggers check for top_pump_dump
-
-    logger.debug(
-        "Extract time: %s / Time ran: %s.",
-        time.time() - start_time,
-        datetime.datetime.now() - init_dateTime,
+telegram.sendGenericMessage(
+    "*Bot has started.* Following _{0}_ pairs.", len(filteredAssets)
+)
+if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0:
+    telegram.sendGenericMessage(
+        "*Bot has started.* Following _{0}_ pairs.",
+        len(filteredAssets),
+        isAlertChat=True,
     )
 
-    while time.time() - start_time < config["extractInterval"]:
-        sleep(
-            config["extractInterval"] - time.time() + start_time
-        )  # Sleeps for the remainder of 1s
-        pass  # Loop until 1s has passed to getPrices again
+while True:
+    loopStartTime = time.time()
+
+    initialTimeInSeconds = resetPricesDataWhenDue(
+        filteredAssets, initialTimeInSeconds, resetIntervalInSeconds
+    )
+
+    exchangeAssets = retrieveExchangeAssets(
+        config["apiUrl"], priceRetryIntervalInSeconds
+    )
+
+    if config["checkNewListingEnabled"]:
+        filteredAssets = checkAddNewAssetListings(
+            initialAssets,
+            filteredAssets,
+            exchangeAssets,
+            [] if "watchlist" not in config else config["watchlist"],
+            config["pairsOfInterest"],
+            config["chartIntervals"],
+        )
+        # Reset initial exchange asset
+        initialAssets = exchangeAssets
+
+    filteredAssets = updateAllMonitoredAssetsAndSendMessages(
+        filteredAssets,
+        exchangeAssets,
+        config["dumpEnabled"],
+        chartIntervals,
+        extractIntervalInSeconds,
+        config["outlierIntervals"],
+        hardAlertMinimumimumInSeconds,
+        config["hardAlertIntervalEnabled"],
+    )
+
+    topReportIntervals = checkToSendTopPumpDumpStatisticsReport(
+        filteredAssets,
+        topReportIntervals,
+        config["topPumpEnabled"],
+        config["topDumpEnabled"],
+        config["additionalStatsEnabled"],
+        config["noOfReportedCoins"],
+    )
+
+    while time.time() - loopStartTime < extractIntervalInSeconds:
+        # Sleeps for the remainder of 1s
+        sleep(extractIntervalInSeconds - time.time() + loopStartTime)
+        # Loop until 1s has passed to retrieveAssets again
+        pass

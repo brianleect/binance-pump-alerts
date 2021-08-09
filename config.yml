@@ -1,6 +1,11 @@
-# Main params
+# Binance Pump and Dump Alert Configuration
 
-chartIntervals: # Intervals which are monitored
+# Using Spot API with url set to https://api.binance.com/api/v3/ticker/price
+# Using Futures API with url set to: https://fapi.binance.com/fapi/v1/ticker/price
+apiUrl: https://api.binance.com/api/v3/ticker/price
+
+# Intervals which are monitored. Add or remove intervals as you like.
+chartIntervals:
   - 1s
   - 5s
   - 15s
@@ -13,53 +18,73 @@ chartIntervals: # Intervals which are monitored
   - 3h
   - 6h
 
-outlierParams: # % value at which an alert is triggered. Ensure interval exists in chartIntervals as well
+# Values in %  at which an alert is triggered. Ensure interval exists in chartIntervals as well.
+outlierIntervals:
   "1s": 0.02
   "5s": 0.05
   "15s": 0.06
   "30s": 0.08
   "1m": 0.1
-  "5m": 0.10
+  "5m": 0.1
   "15m": 0.15
-  "30m": 0.20
-  "1h": 0.30
+  "30m": 0.2
+  "1h": 0.3
   "3h": 0.4
   "6h": 0.5
 
-pairsOfInterest: # Other options include 'BTC' , 'ETH'
+# List the trading currency you are interested in. Other options include 'BUSD', 'BTC' , 'ETH'
+pairsOfInterest:
   - USDT
 
 # Used for telegram bot updates
-telegramToken: mySecretToken # Insert telegramToken obtained from @BotFather here
-telegramChatId: mySecretChatId # Insert Chat ID obtained from @get_id_bot here
-telegramAlertChatId: 0 # Insert Chat ID for top pump dump alert, if left at 0 it'll send to telegramChatId
+
+# Insert telegramToken obtained from @BotFather here
+telegramToken: mySecretToken
+# Insert Chat ID obtained from @get_id_bot here
+telegramChatId: mySecretChatId
+# Insert Chat ID for top pump dump alert, if left on `0` it'll send the message to telegramChatId
+telegramAlertChatId: 0
 
 # Useful Params
-extractInterval: 1s # Interval between each price extract from Binance REST API
+
+# Interval between each price extract from Binance REST API
+extractInterval: 1s
 
 # Alert Interval Params
-hardAlertIntervalEnabled: True # If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
-hardAlertMin: 5m # Minimum interval between each alert. Only will be utlized when hardAlertIntervalEnabled is False.
+
+# If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
+hardAlertIntervalEnabled: True
+# Minimum interval between each alert. Only will be utlized when hardAlertIntervalEnabled is False.
+hardAlertMinimum: 5m
 
 # Optional Watchlist only mode
-# watchlist:  # E.g. 'ADAUSDT', 'ETHUSDT' # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
+# E.g. 'ADAUSDT', 'ETHUSDT' # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
+# watchlist:
 #   - ADAUSDT
 #   - ETHUSDT
 
 # Feature params
-futuresEnabled: False # Determine whether to look at future markets
-dumpEnabled: True # Determine whether to look at DUMP
+
+# Determine whether to look at DUMPs
+dumpEnabled: True
 
 # Top Pump & Dump Feature Params
-topPumpEnabled: True # Set to false if not interested in top pump info
-topDumpEnabled: True # Set to false if not interested in top dump info
-additionalStatsEnabled: True # Set to false if not interested in net movement of coins
-viewNumber: 5 # Top X amount of coins shown, adjust to show more or less within the timeframe
-tdpaIntervals: # Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
+
+# Set to false if not interested in top pump info
+topPumpEnabled: True
+# Set to false if not interested in top dump info
+topDumpEnabled: True
+# Set to false if not interested in net movement of coins
+additionalStatsEnabled: True
+# Top X amount of coins shown in the interval report, adjust to show more or less within the timeframe
+noOfReportedCoins: 5
+# Intervals for top pump and dump to be sent, Ensure its in interval + outlier_param as well
+tpdIntervals:
   - "1h"
   - "3h"
+  - "6h"
 
-# Visual Params
+# Visual Params. Define your own bot emojis.
 botEmoji: ! "\U0001F916" # 🤖
 pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4B9' 💹
 dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉
@@ -67,9 +92,16 @@ tdpaEmoji: ! "\U0001F3C6" # 🏆
 newListingEmoji: ! "\U0001F4F0" # 📰
 
 # Debug Params (Avoid touching it if there's no issues)
-debug: False # If false we do not print messages
-resetInterval: 12h # Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
-priceRetryInterval: 1s # In the case of get price fail, this is the time delay before re-attempt
-telegramRetryInterval: 1s # If telegram message fails to send, this is the time delay before re-attempt
-tdpaInitialBuffer: 5m # Initial buffer before we trigger TDPA. Prevents all 0% lack of data points
-checkNewListingEnabled: True # Disables checking and adding of new listing pairs
+
+# If False we do not print unnecessary messages
+debug: False
+# Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
+resetInterval: 12h
+# In the case of get price fail, this is the time delay before re-attempt
+priceRetryInterval: 5s
+# If telegram message fails to send, this is the time delay before re-attempt
+telegramRetryInterval: 2s
+# Initial buffer before we trigger TPDA. Prevents all 0% lack of data points
+tpdInitialOffset: 5m
+# Disables checking and adding of new listing pairs
+checkNewListingEnabled: True
