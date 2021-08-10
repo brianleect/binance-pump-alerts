@@ -69,9 +69,6 @@ process_config() {
     if [[ -n $TELEGRAM_RETRY_INTERVAL ]]; then
         sed -i "s/telegramRetryInterval.*/telegramRetryInterval: ${TELEGRAM_RETRY_INTERVAL}/" config.yml
     fi
-    if [[ -n $TPD_INITIAL_OFFSET ]]; then
-        sed -i "s/tpdInitialOffset.*/tpdInitialOffset: ${TPD_INITIAL_OFFSET}/" config.yml
-    fi
     if [[ -n $CHECK_NEW_LISTING_ENABLED ]]; then
         sed -i "s/checkNewListingEnabled.*/checkNewListingEnabled: ${CHECK_NEW_LISTING_ENABLED}/" config.yml
     fi

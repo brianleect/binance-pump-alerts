@@ -280,7 +280,6 @@ telegram = TelegramSender(
 
 extractIntervalInSeconds = durationToSeconds(config["extractInterval"])
 priceRetryIntervalInSeconds = durationToSeconds(config["priceRetryInterval"])
-tpdInitialOffsetInSeconds = durationToSeconds(config["tpdInitialOffset"])
 resetIntervalInSeconds = durationToSeconds(config["resetInterval"])
 
 chartIntervals = {}
@@ -291,9 +290,7 @@ for interval in config["chartIntervals"]:
 topReportIntervals = {}
 for interval in config["tpdReportsIntervals"]:
     topReportIntervals[interval] = {}
-    topReportIntervals[interval]["startTime"] = (
-        initialTimeInSeconds + tpdInitialOffsetInSeconds
-    )
+    topReportIntervals[interval]["startTime"] = initialTimeInSeconds
     topReportIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
 
 initialAssets = retrieveExchangeAssets(config["apiUrl"], priceRetryIntervalInSeconds)

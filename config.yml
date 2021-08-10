@@ -96,5 +96,3 @@ priceRetryInterval: 5s
 telegramRetryInterval: 2s
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True
-# Initial buffer before we trigger TPDA. Prevents all 0% lack of data points
-tpdInitialOffset: 5m
