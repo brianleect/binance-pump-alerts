@@ -8,7 +8,7 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 
 ## Manual Setup
 
-1. On the command line run the command `pip install -r requirements.txt` while located at folder with code.
+1. On the command-line run the command `pip install -r requirements.txt` while located at folder with code.
 1. Create a new telegram bot token from [@botfather](https://t.me/BotFather).
 1. Get telegram `chat_id` from [@get_id_bot](https://telegram.me/get_id_bot).
    - Alternatively, a `channel_id` can be used as well.
@@ -19,7 +19,7 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 
 1. Use environment variables in the `docker-compse.yml` file to provide your config.
    - See `entrypoint.sh` for environment variable names and the config possibilities.
-   - You can also use a `.env` file, thats how we do it, during development.
+   - You can also use a `.env` file, that's how we do it, during development.
    - If changing the config parameters, you have to make sure that search and replace will place the right parameter in the `config.yml`
    - Emojis are more tricky therefore defining it with some tricks e.g. `PUMP_EMOJI="! \"\\\\U0001F4B9\""`
 1. On the command line run `docker-compose up -d --build` to create and run the docker image/container.

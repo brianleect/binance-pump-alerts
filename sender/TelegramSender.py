@@ -7,9 +7,9 @@ class TelegramSender:
     def __init__(
         self,
         token,
-        retry_interval,
         chat_id,
-        alert_chat_id,
+        alert_chat_id=0,
+        retry_interval=2,
         bot_emoji="\U0001F916",  # 🤖
         pump_emoji="\U0001F7E2",  # 🟢
         dump_emoji="\U0001F534",  # 🔴
@@ -18,9 +18,9 @@ class TelegramSender:
     ):
 
         self.token = token
-        self.retry_interval = retry_interval
         self.chat_id = chat_id
         self.alert_chat_id = alert_chat_id
+        self.retry_interval = retry_interval
 
         self.bot_emoji = bot_emoji
         self.pump_emoji = pump_emoji
@@ -36,6 +36,9 @@ class TelegramSender:
         except Exception as e:
             self.logger.error("Error initializing Telegram bot. Exception: %s.", e)
             quit()
+
+    def is_alert_chat_enabled(self):
+        return self.alert_chat_id != 0 and self.alert_chat_id != self.chat_id
 
     def send_message(self, message, is_alert_chat=False):
         while True:
