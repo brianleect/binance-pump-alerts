@@ -82,8 +82,6 @@ def filterAndConvertAssets(exchangeAssets, watchlist, pairsOfInterest, chartInte
 
 
 def createNewAsset(symbol, chartIntervals):
-    now = time.time()
-
     asset = {}
     asset["symbol"] = symbol
     asset["price"] = []
@@ -163,14 +161,16 @@ def calculateAssetChangeAndSendMessage(
     return asset
 
 
-def resetPricesDataWhenDue(assets, initialTimeInSeconds, resetInterval):
-    if time.time() - initialTimeInSeconds > resetInterval:
+def resetPricesDataWhenDue(
+    initialTimeInSeconds, currentTimeInSeconds, resetIntervalInSeconds, assets
+):
+    if currentTimeInSeconds - initialTimeInSeconds > resetIntervalInSeconds:
         logger.debug("Emptying price data to prevent memory errors.")
         telegram.sendGenericMessage("Emptying price data to prevent memory errors.")
         for asset in assets:
             asset["price"] = []
 
-        initialTimeInSeconds = time.time()
+        initialTimeInSeconds = currentTimeInSeconds
 
     return initialTimeInSeconds
 
@@ -209,21 +209,23 @@ def checkAddNewAssetListings(
 
 def checkToSendTopPumpDumpStatisticsReport(
     assets,
+    currentTimeInSeconds,
     topReportIntervals,
     topPumpEnabled,
     topDumpEnabled,
     additionalStatsEnabled,
     noOfReportedCoins,
 ):
+
     for interval in topReportIntervals:
         if (
-            time.time()
+            currentTimeInSeconds
             > topReportIntervals[interval]["startTime"]
             + topReportIntervals[interval]["intervalInSeconds"]
             + 8  # Magic number ;)
         ):
             # Update time for new trigger
-            topReportIntervals[interval]["startTime"] = time.time()
+            topReportIntervals[interval]["startTime"] = currentTimeInSeconds
 
             telegram.sendTopPumpDumpStatisticsReport(
                 assets,
@@ -313,10 +315,13 @@ if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0:
     )
 
 while True:
-    loopStartTime = time.time()
+    startLoopTimeInSeconds = time.time()
 
     initialTimeInSeconds = resetPricesDataWhenDue(
-        filteredAssets, initialTimeInSeconds, resetIntervalInSeconds
+        initialTimeInSeconds,
+        startLoopTimeInSeconds,
+        resetIntervalInSeconds,
+        filteredAssets,
     )
 
     exchangeAssets = retrieveExchangeAssets(
@@ -346,6 +351,7 @@ while True:
 
     topReportIntervals = checkToSendTopPumpDumpStatisticsReport(
         filteredAssets,
+        startLoopTimeInSeconds,
         topReportIntervals,
         config["topPumpEnabled"],
         config["topDumpEnabled"],
@@ -353,8 +359,5 @@ while True:
         config["noOfReportedCoins"],
     )
 
-    while time.time() - loopStartTime < extractIntervalInSeconds:
-        # Sleeps for the remainder of 1s
-        sleep(extractIntervalInSeconds - time.time() + loopStartTime)
-        # Loop until 1s has passed to retrieveAssets again
-        pass
+    # Sleeps for the remainder of 1s
+    sleep(startLoopTimeInSeconds + extractIntervalInSeconds - time.time())
