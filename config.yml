@@ -72,7 +72,7 @@ additionalStatsEnabled: True
 # Top X amount of coins shown in the interval report, adjust to show more or less within the timeframe
 noOfReportedCoins: 5
 # Intervals for top pump and dump to be sent, ensure its in chartIntervals + outlierIntervals as well
-tpdReportsIntervals:
+topReportsIntervals:
   - "1h"
   - "3h"
   - "6h"

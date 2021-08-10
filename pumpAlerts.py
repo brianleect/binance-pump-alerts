@@ -290,7 +290,7 @@ for interval in config["chartIntervals"]:
     chartIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
 
 topReportIntervals = {}
-for interval in config["tpdReportsIntervals"]:
+for interval in config["topReportsIntervals"]:
     topReportIntervals[interval] = {}
     topReportIntervals[interval]["startTime"] = initialTimeInSeconds
     topReportIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
@@ -301,7 +301,7 @@ filteredAssets = filterAndConvertAssets(
     initialAssets,
     [] if "watchlist" not in config else config["watchlist"],
     config["pairsOfInterest"],
-    config["chartIntervals"],
+    chartIntervals,
 )
 
 telegram.sendGenericMessage(
@@ -335,7 +335,7 @@ while True:
             exchangeAssets,
             [] if "watchlist" not in config else config["watchlist"],
             config["pairsOfInterest"],
-            config["chartIntervals"],
+            chartIntervals,
         )
         # Reset initial exchange asset
         initialAssets = exchangeAssets

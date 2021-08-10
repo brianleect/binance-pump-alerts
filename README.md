@@ -35,14 +35,9 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 
 1. `chartIntervals`: Can be modified to consider other timeframes, follow the format of 's' for seconds, 'm' for minutes, 'h' for hours.
 1. `outlierIntervals`: (0.01 -> 1% , 0.1 -> 10%), modify accordingly based on needs. Avoid setting it too low to avoid noise.
-1. `extractInterval`: Default `1s`, Interval at which we retrieve the price information from Binance.
-1. `pairsOfInterest`: Default is USDT. Other options include BUSD, BTC, ETH etc.
-
-### Alert Interval Params
-
-1. `hardAlertIntervalEnabled`: Prevents triggering of the same interval for the timeframe of the interval. E.g. `5m` triggers. Will not trigger intervals >= `5m` for 5 minutes. Other intervals < `5m` such as `1s`, `5s` will continue to be triggered.
-1. `hardAlertMinimum`: _(Legacy)_ Set hardAlertIntervalEnabled to false to enable this.
-   - Does not trigger another alert within the same pair for the specified duration.
+1. `extractInterval`: Default is `1s`, Interval at which we retrieve the price information from Binance.
+1. `pairsOfInterest`: Default is _USDT_. Other options include BUSD, BTC, ETH etc.
+1. `topReportIntervals`: Default is `1h`,`3h`and `6h` Intervals for top pump and dump reports to be sent, ensure its in chartIntervals + outlierIntervals as well.
 
 ### Optional features to enable
 
