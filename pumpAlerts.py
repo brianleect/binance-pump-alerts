@@ -131,6 +131,7 @@ def calculateAssetChangeAndSendMessage(
             chartIntervals[interval]["intervalInSeconds"] / extractIntervalInSeconds
         )
 
+        # If data is not avalilable yet after restart for interval, stop here.
         if dataPoints >= assetLength:
             break
 
@@ -138,7 +139,7 @@ def calculateAssetChangeAndSendMessage(
         priceDelta = asset["price"][-1] - asset["price"][-1 - dataPoints]
         change = priceDelta / asset["price"][-1]
 
-        # Stores change for the interval into asset dict (Used for top pump/dumps)
+        # Stores change for the interval into asset dict. Only used for top pump/dump report.
         asset[interval] = change
 
         if abs(change) >= outlierIntervals[interval]:
@@ -288,7 +289,7 @@ for interval in config["chartIntervals"]:
     chartIntervals[interval]["intervalInSeconds"] = durationToSeconds(interval)
 
 topReportIntervals = {}
-for interval in config["tpdIntervals"]:
+for interval in config["tpdReportsIntervals"]:
     topReportIntervals[interval] = {}
     topReportIntervals[interval]["startTime"] = (
         initialTimeInSeconds + tpdInitialOffsetInSeconds
