@@ -133,11 +133,11 @@ def calculateAssetChangeAndSendMessage(
         if dataPoints >= assetLength:
             break
 
-        # Gets change in % from last alert trigger
+        # Gets change in % from last alert trigger.
         priceDelta = asset["price"][-1] - asset["price"][-1 - dataPoints]
         change = priceDelta / asset["price"][-1]
 
-        # Stores change for the interval into asset dict. Only used for top pump/dump report.
+        # Stores change for the interval into asset dict. Only used for top pump dump report.
         asset[interval] = change
 
         if abs(change) >= outlierIntervals[interval]:
@@ -241,19 +241,19 @@ def checkToSendTopPumpDumpStatisticsReport(
 
 # Read config
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-yaml_file = open(os.path.join(__location__, "config.yml"), "r", encoding="utf-8")
-config = yaml.load(yaml_file, Loader=yaml.FullLoader)
+yamlFile = open(os.path.join(__location__, "config.yml"), "r", encoding="utf-8")
+config = yaml.load(yamlFile, Loader=yaml.FullLoader)
 
 # Define the log format
-log_format = "[%(asctime)s] %(levelname)-8s %(name)-25s %(message)s"
+boldSeq = "\033[1m"
+logFormat = "[%(asctime)s] %(levelname)-8s %(name)-25s %(message)s"
+colorlogFormat = f"{boldSeq} " "%(log_color)s " f"{logFormat}"
 
-bold_seq = "\033[1m"
-colorlog_format = f"{bold_seq} " "%(log_color)s " f"{log_format}"
 colorlog.basicConfig(
     # Define logging level according to the configuration
     level=logging.DEBUG if config["debug"] == True else logging.INFO,
     # Declare the object we created to format the log messages
-    format=colorlog_format,
+    format=colorlogFormat,
     # Declare handlers for the Console
     handlers=[logging.StreamHandler()],
 )
