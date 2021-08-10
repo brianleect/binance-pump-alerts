@@ -125,12 +125,20 @@ def calculateAssetChangeAndSendMessage(
 
     for interval in chartIntervals:
 
+        logger.debug("Calculate asset: %s with interval: %s", asset["symbol"], interval)
+
         dataPoints = int(
             chartIntervals[interval]["intervalInSeconds"] / extractIntervalInSeconds
         )
 
         # If data is not avalilable yet after restart for interval, stop here.
         if dataPoints >= assetLength:
+            logger.debug(
+                "Not enough datapoints (%s/%s) for interval: %s",
+                assetLength,
+                dataPoints,
+                interval,
+            )
             break
 
         # Gets change in % from last alert trigger.
@@ -165,8 +173,10 @@ def resetPricesDataWhenDue(
     initialTimeInSeconds, currentTimeInSeconds, resetIntervalInSeconds, assets
 ):
     if currentTimeInSeconds - initialTimeInSeconds > resetIntervalInSeconds:
+
         logger.debug("Emptying price data to prevent memory errors.")
         telegram.sendGenericMessage("Emptying price data to prevent memory errors.")
+
         for asset in assets:
             asset["price"] = []
 
@@ -186,6 +196,7 @@ def checkToAddNewAssetListings(
 
     if len(initialAssets) >= len(exchangeAssets):
         # If initialAssets has more than assets we just ignore it
+        logger.debug("No new listing found.")
         return filteredAssets
 
     initSymbols = [asset["symbol"] for asset in initialAssets]
@@ -195,11 +206,15 @@ def checkToAddNewAssetListings(
         if exchangeAsset["symbol"] not in initSymbols
     ]
 
+    logger.debug("New listings found: %s", retrievedSymbolsToAdd)
+
     filteredSymbolsToAdd = []
     for symbol in retrievedSymbolsToAdd:
         if isSymbolValid(symbol, watchlist, pairsOfInterest):
             filteredSymbolsToAdd.append(symbol)
             filteredAssets.append(createNewAsset(symbol, chartIntervals))
+
+    logger.debug("Filtered new listings found: %s", filteredSymbolsToAdd)
 
     # Sends combined message
     telegram.sendNewListingMessage(filteredSymbolsToAdd)
@@ -226,6 +241,8 @@ def checkToSendTopPumpDumpStatisticsReport(
         ):
             # Update time for new trigger
             topReportIntervals[interval]["startTime"] = currentTimeInSeconds
+
+            logger.debug("Sending out top pump dump report. Interval: %s", interval)
 
             telegram.sendTopPumpDumpStatisticsReport(
                 assets,
