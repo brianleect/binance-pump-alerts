@@ -79,7 +79,9 @@ class BinancePumpAndDumpAlerter:
         asset = {"symbol": symbol, "price": []}
 
         for interval in chart_intervals:
-            asset[interval] = 0
+            asset[interval] = {}
+            asset[interval]["change_alert"] = 0
+            asset[interval]["change_top_report"] = 0
 
         return asset
 
@@ -112,7 +114,8 @@ class BinancePumpAndDumpAlerter:
             or ("DOWN" in symbol)
             or ("BULL" in symbol)
             or ("BEAR" in symbol)
-        ) and ("SUPER" not in symbol):
+            or ("SUPER" in symbol)
+        ):
             self.logger.debug("Ignoring leverage symbol: %s.", symbol)
             return False
 
@@ -140,7 +143,7 @@ class BinancePumpAndDumpAlerter:
 
         return filtered_assets
 
-    def update_all_monitored_assets_and_send_messages(
+    def update_all_monitored_assets_and_send_alert_messages(
         self,
         monitored_assets,
         exchange_assets,
@@ -152,7 +155,8 @@ class BinancePumpAndDumpAlerter:
         for asset in monitored_assets:
             exchange_asset = self.extract_ticker_data(asset["symbol"], exchange_assets)
             asset["price"].append(float(exchange_asset["price"]))
-            self.calculate_asset_change_and_send_message(
+
+            self.calculate_asset_change(
                 asset,
                 dump_enabled,
                 chart_intervals,
@@ -160,9 +164,11 @@ class BinancePumpAndDumpAlerter:
                 outlier_intervals,
             )
 
+            self.send_summarized_pump_dump_message(asset, chart_intervals, dump_enabled)
+
         return monitored_assets
 
-    def calculate_asset_change_and_send_message(
+    def calculate_asset_change(
         self,
         asset,
         dump_enabled,
@@ -195,25 +201,10 @@ class BinancePumpAndDumpAlerter:
             change = price_delta / asset["price"][-1]
 
             # Stores change for the interval into asset dict. Only used for top pump dump report.
-            asset[interval] = change
+            asset[interval]["change_top_report"] = change
 
             if abs(change) >= outlier_intervals[interval]:
-
-                if change > 0:
-                    self.telegram.send_pump_message(
-                        interval,
-                        asset["symbol"],
-                        change,
-                        asset["price"][-1],
-                    )
-
-                if change < 0 and dump_enabled:
-                    self.telegram.send_dump_message(
-                        interval,
-                        asset["symbol"],
-                        change,
-                        asset["price"][-1],
-                    )
+                asset[interval]["change_alert"] = change
 
         return asset
 
@@ -230,6 +221,7 @@ class BinancePumpAndDumpAlerter:
             self.logger.debug(message)
             self.telegram.send_generic_message(message)
 
+            # TODO: Do not delete everything, only elements older than the last monitored interval
             for asset in assets:
                 asset["price"] = []
 
@@ -274,7 +266,7 @@ class BinancePumpAndDumpAlerter:
 
         return filtered_assets
 
-    def send_top_pump_dump_statistics_report(
+    def check_and_send_top_pump_dump_statistics_report(
         self,
         assets,
         current_time,
@@ -299,7 +291,7 @@ class BinancePumpAndDumpAlerter:
                     "Sending out top pump dump report. Interval: %s.", interval
                 )
 
-                self.telegram.send_top_pump_dump_statistics_report(
+                self.send_top_pump_dump_statistics_report(
                     assets,
                     interval,
                     top_pump_enabled,
@@ -358,7 +350,7 @@ class BinancePumpAndDumpAlerter:
                 # Reset initial exchange asset
                 initial_assets = exchange_assets
 
-            filtered_assets = self.update_all_monitored_assets_and_send_messages(
+            filtered_assets = self.update_all_monitored_assets_and_send_alert_messages(
                 filtered_assets,
                 exchange_assets,
                 self.dump_enabled,
@@ -367,14 +359,16 @@ class BinancePumpAndDumpAlerter:
                 self.outlier_intervals,
             )
 
-            self.top_report_intervals = self.send_top_pump_dump_statistics_report(
-                filtered_assets,
-                start_loop_time,
-                self.top_report_intervals,
-                self.top_pump_enabled,
-                self.top_dump_enabled,
-                self.additional_statistics_enabled,
-                self.no_of_reported_coins,
+            self.top_report_intervals = (
+                self.check_and_send_top_pump_dump_statistics_report(
+                    filtered_assets,
+                    start_loop_time,
+                    self.top_report_intervals,
+                    self.top_pump_enabled,
+                    self.top_dump_enabled,
+                    self.additional_statistics_enabled,
+                    self.no_of_reported_coins,
+                )
             )
 
             # Sleeps for the remainder of 1s, or loops through if extraction takes longer
@@ -391,3 +385,96 @@ class BinancePumpAndDumpAlerter:
                 sleep_time = start_loop_time + self.extract_interval - end_loop_time
                 self.logger.debug("Now sleeping %f seconds.", sleep_time)
                 sleep(sleep_time)
+
+    def send_summarized_pump_dump_message(
+        self,
+        asset,
+        chart_intervals,
+        dump_enabled=True,
+    ):
+        for interval in chart_intervals:
+
+            change = asset[interval]["change_alert"]
+
+            # TODO: Send summarized alert messages to reduce
+            if change > 0:
+                self.telegram.send_pump_message(
+                    interval,
+                    asset["symbol"],
+                    change,
+                    asset["price"][-1],
+                )
+
+            if change < 0 and dump_enabled:
+                self.telegram.send_dump_message(
+                    interval,
+                    asset["symbol"],
+                    change,
+                    asset["price"][-1],
+                )
+
+    def send_top_pump_dump_statistics_report(
+        self,
+        assets,
+        interval,
+        top_pump_enabled=True,
+        top_dump_enabled=True,
+        additional_stats_enabled=True,
+        no_of_reported_coins=5,
+    ):
+        message = "*[{0} Interval]*\n\n".format(interval)
+
+        if top_pump_enabled:
+            pump_sorted_list = sorted(assets, key=lambda i: i[interval], reverse=True)[
+                0:no_of_reported_coins
+            ]
+
+            message += "*Top {0} Pumps*\n".format(no_of_reported_coins)
+
+            for asset in pump_sorted_list:
+                message += "- {0}: _{1:.2f}_%\n".format(
+                    asset["symbol"], asset[interval] * 100
+                )
+            message += "\n"
+
+        if top_dump_enabled:
+            dump_sorted_list = sorted(assets, key=lambda i: i[interval])[
+                0:no_of_reported_coins
+            ]
+
+            message += "*Top {0} Dumps*\n".format(no_of_reported_coins)
+
+            for asset in dump_sorted_list:
+                message += "- {0}: _{1:.2f}_%\n".format(
+                    asset["symbol"], asset[interval] * 100
+                )
+
+        if additional_stats_enabled:
+            if top_pump_enabled or top_dump_enabled:
+                message += "\n"
+            message += self.generate_additional_statistics_report(assets, interval)
+
+        self.telegram.send_interval_message(message, is_alert_chat=True)
+
+    def generate_additional_statistics_report(self, assets, interval):
+        up = 0
+        down = 0
+        sum_change = 0
+
+        for asset in assets:
+            if asset[interval] > 0:
+                up += 1
+            elif asset[interval] < 0:
+                down += 1
+
+            sum_change += asset[interval]
+
+        avg_change = sum_change / len(assets)
+
+        return "*Average Change:* {0:.2f}%\n {1} {2} / {3} {4}".format(
+            avg_change * 100,
+            self.pump_emoji,
+            up,
+            self.dump_emoji,
+            down,
+        )
