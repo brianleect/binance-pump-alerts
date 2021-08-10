@@ -24,10 +24,6 @@ process_config() {
         sed -i "s/extractInterval.*/extractInterval: ${EXTRACT_INTERVAL}/" config.yml
     fi
 
-    if [[ -n $HARD_ALERT_INTERVAL_ENABLED ]]; then
-    sed -i "s/hardAlertIntervalEnabled.*/hardAlertIntervalEnabled: ${HARD_ALERT_INTERVAL_ENABLED}/" config.yml
-    fi
-
     if [[ -n $DUMP_ENABLED ]]; then
         sed -i "s/dumpEnabled.*/dumpEnabled: ${DUMP_ENABLED}/" config.yml
     fi

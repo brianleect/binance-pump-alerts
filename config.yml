@@ -32,10 +32,6 @@ outlierIntervals:
   "3h": 0.4
   "6h": 0.5
 
-# List the trading currency you are interested in. Other options include 'BUSD', 'BTC' , 'ETH'
-pairsOfInterest:
-  - USDT
-
 # Used for telegram bot updates
 
 # Insert telegramToken obtained from @BotFather here
@@ -50,12 +46,9 @@ telegramAlertChatId: 0
 # Interval between each price extract from Binance REST API
 extractInterval: 1s
 
-# Alert Interval Params
-
-# If set to true, if '5m' is triggered, any interval >= '5m' will rest for '5m' before triggering
-hardAlertIntervalEnabled: True
-# Minimum interval between each alert. Only will be utlized when hardAlertIntervalEnabled is False.
-hardAlertMinimum: 5m
+# List the trading currency you are interested in. Other options include 'BUSD', 'BTC' , 'ETH'
+pairsOfInterest:
+  - USDT
 
 # Optional Watchlist only mode
 # E.g. 'ADAUSDT', 'ETHUSDT' # Note that if watchlist has pairs, ONLY pairs in watchlist will be monitored
@@ -101,7 +94,7 @@ resetInterval: 12h
 priceRetryInterval: 5s
 # If telegram message fails to send, this is the time delay before re-attempt
 telegramRetryInterval: 2s
-# Initial buffer before we trigger TPDA. Prevents all 0% lack of data points
-tpdInitialOffset: 5m
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True
+# Initial buffer before we trigger TPDA. Prevents all 0% lack of data points
+tpdInitialOffset: 5m

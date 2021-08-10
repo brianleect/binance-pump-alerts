@@ -86,14 +86,10 @@ def createNewAsset(symbol, chartIntervals):
 
     asset = {}
     asset["symbol"] = symbol
-    asset["price"] = []  # Initialize empty price array
-    asset["lt_dict"] = {}  # Used for hard alert interval
-    asset["lt_time"] = now  # Used for hardAlertMinimum
-    asset["lt_price"] = 0  # Last triggered price for alert
+    asset["price"] = []
 
     for interval in chartIntervals:
         asset[interval] = 0
-        asset["lt_dict"][interval] = now
 
     return asset
 
@@ -105,8 +101,6 @@ def updateAllMonitoredAssetsAndSendMessages(
     chartIntervals,
     extractIntervalInSeconds,
     outlierIntervals,
-    hardAlertMinimumimumInSeconds,
-    hardAlertIntervalEnabled,
 ):
     for asset in monitoredAssets:
         exchangeAsset = exctractTickerData(asset["symbol"], exchangeAssets)
@@ -117,8 +111,6 @@ def updateAllMonitoredAssetsAndSendMessages(
             chartIntervals,
             extractIntervalInSeconds,
             outlierIntervals,
-            hardAlertMinimumimumInSeconds,
-            hardAlertIntervalEnabled,
         )
 
     return monitoredAssets
@@ -130,8 +122,6 @@ def calculateAssetChangeAndSendMessage(
     chartIntervals,
     extractIntervalInSeconds,
     outlierIntervals,
-    hardAlertMinimummumInSeconds,
-    hardAlertIntervalEnabled,
 ):
     assetLength = len(asset["price"])
 
@@ -141,45 +131,17 @@ def calculateAssetChangeAndSendMessage(
             chartIntervals[interval]["intervalInSeconds"] / extractIntervalInSeconds
         )
 
-        now = time.time()
-
         if dataPoints >= assetLength:
-            break
-
-        # Skip checking for period since last triggered
-        if not hardAlertIntervalEnabled and (
-            now - asset["lt_time"] < hardAlertMinimummumInSeconds
-        ):
-            break
-
-        # Skip checking for period since last triggered
-        if hardAlertIntervalEnabled and (
-            now - asset["lt_dict"][interval]
-            < chartIntervals[interval]["intervalInSeconds"]
-        ):
-            logger.debug("Duration insufficient %s: %s.", asset["symbol"], interval)
             break
 
         # Gets change in % from last alert trigger
         priceDelta = asset["price"][-1] - asset["price"][-1 - dataPoints]
         change = priceDelta / asset["price"][-1]
 
-        priceDelta = asset["price"][-1] - asset["lt_price"]
-        ltChange = priceDelta / asset["price"][-1]
-
         # Stores change for the interval into asset dict (Used for top pump/dumps)
         asset[interval] = change
 
-        if (
-            abs(change) >= outlierIntervals[interval]
-            and abs(ltChange) >= outlierIntervals[interval]
-        ):
-            # Updates last triggerd price
-            asset["lt_price"] = asset["price"][-1]
-            # Updates last triggered time for hardAlertMinimum
-            asset["lt_time"] = now
-            # Updates last triggered time for hard alert interval
-            asset["lt_dict"][interval] = now
+        if abs(change) >= outlierIntervals[interval]:
 
             if change > 0:
                 telegram.sendPumpMessage(
@@ -196,10 +158,6 @@ def calculateAssetChangeAndSendMessage(
                     change,
                     asset["price"][-1],
                 )
-
-            # Note that we don't need to break as we have updated 'lt_dict' parameter which will skip the remaining chartIntervals
-            # Prevents continuation of checking other chartIntervals
-            return asset
 
     return asset
 
@@ -321,7 +279,6 @@ telegram = TelegramSender(
 
 extractIntervalInSeconds = durationToSeconds(config["extractInterval"])
 priceRetryIntervalInSeconds = durationToSeconds(config["priceRetryInterval"])
-hardAlertMinimumimumInSeconds = durationToSeconds(config["hardAlertMinimum"])
 tpdInitialOffsetInSeconds = durationToSeconds(config["tpdInitialOffset"])
 resetIntervalInSeconds = durationToSeconds(config["resetInterval"])
 
@@ -387,8 +344,6 @@ while True:
         chartIntervals,
         extractIntervalInSeconds,
         config["outlierIntervals"],
-        hardAlertMinimumimumInSeconds,
-        config["hardAlertIntervalEnabled"],
     )
 
     topReportIntervals = checkToSendTopPumpDumpStatisticsReport(
