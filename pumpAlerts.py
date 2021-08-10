@@ -175,7 +175,7 @@ def resetPricesDataWhenDue(
     return initialTimeInSeconds
 
 
-def checkAddNewAssetListings(
+def checkToAddNewAssetListings(
     initialAssets,
     filteredAssets,
     exchangeAssets,
@@ -329,7 +329,7 @@ while True:
     )
 
     if config["checkNewListingEnabled"]:
-        filteredAssets = checkAddNewAssetListings(
+        filteredAssets = checkToAddNewAssetListings(
             initialAssets,
             filteredAssets,
             exchangeAssets,
