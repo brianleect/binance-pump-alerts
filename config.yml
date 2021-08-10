@@ -72,16 +72,16 @@ additionalStatsEnabled: True
 # Top X amount of coins shown in the interval report, adjust to show more or less within the timeframe
 noOfReportedCoins: 5
 # Intervals for top pump and dump to be sent, ensure its in chartIntervals + outlierIntervals as well
-topReportsIntervals:
+topReportIntervals:
   - "1h"
   - "3h"
   - "6h"
 
-# Visual Params. Define your own bot emojis.
+# Define your own bot emojis.
 botEmoji: ! "\U0001F916" # 🤖
 pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4B9' 💹
 dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉
-tdpaEmoji: ! "\U0001F3C6" # 🏆
+topEmoji: ! "\U0001F3C6" # 🏆
 newListingEmoji: ! "\U0001F4F0" # 📰
 
 # Debug Params (Avoid touching it if there's no issues)

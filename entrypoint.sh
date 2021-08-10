@@ -4,7 +4,7 @@ set -e
 process_config() {
 
     # Please mount your own config file into the container for unsupported env parameters!
-    # Currently not supported config paramenters: chartIntervals, outlierIntervals, pairsOfInterest, watchlist, topReportsIntervals
+    # Currently not supported config paramenters: chartIntervals, outlierIntervals, pairsOfInterest, watchlist, topReportIntervals
 
     if [[ -n $API_URL ]]; then
         sed -i "s/apiUrl.*/apiUrl: ${API_URL}/" config.yml
@@ -50,8 +50,8 @@ process_config() {
     if [[ -n $DUMP_EMOJI ]]; then
         sed -i "s/dumpEmoji.*/dumpEmoji: ${DUMP_EMOJI}/" config.yml
     fi
-    if [[ -n $TDPA_EMOJI ]]; then
-        sed -i "s/tdpaEmoji.*/tdpaEmoji: ${TDPA_EMOJI}/" config.yml
+    if [[ -n $TOP_EMOJI ]]; then
+        sed -i "s/topEmoji.*/topEmoji: ${TOP_EMOJI}/" config.yml
     fi
     if [[ -n $NEW_LISTING_EMOJI ]]; then
         sed -i "s/newListingEmoji.*/newListingEmoji: ${NEW_LISTING_EMOJI}/" config.yml
