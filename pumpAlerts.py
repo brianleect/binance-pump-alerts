@@ -26,7 +26,7 @@ colorlog.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 
-# Define your own logger name
+# Define your logger name
 logger = logging.getLogger("binance-pump-alerts-app")
 
 # Logg whole configuration during the startup
