@@ -53,8 +53,8 @@ process_config() {
     if [[ -n $TOP_EMOJI ]]; then
         sed -i "s/topEmoji.*/topEmoji: ${TOP_EMOJI}/" config.yml
     fi
-    if [[ -n $NEW_LISTING_EMOJI ]]; then
-        sed -i "s/newListingEmoji.*/newListingEmoji: ${NEW_LISTING_EMOJI}/" config.yml
+    if [[ -n $NEWS_EMOJI ]]; then
+        sed -i "s/newsEmoji.*/newsEmoji: ${NEWS_EMOJI}/" config.yml
     fi
 
     if [[ -n $DEBUG ]]; then

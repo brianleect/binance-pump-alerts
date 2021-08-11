@@ -2,13 +2,13 @@
 
 BPA is a simple application which gets the price data from Binance Spot or Futures API and sends Telegram messages based on parameters set used to detect pumps and dumps on the Binance Exchange.
 
-[Demo Telegram Channel](https://t.me/binance_pump_alerts) hosted on AWS ec2 running latest version 24/7.
+[Demo Telegram Channel](https://t.me/binance_pump_alerts) hosted on AWS ec2 running the latest version 24/7.
 
 ![image](https://user-images.githubusercontent.com/63389110/128601355-4be90b36-5e54-4be6-bf85-00fc395645de.png)
 
 ## Manual Setup
 
-1. On the command-line run the command `pip install -r requirements.txt` while located at folder with code.
+1. On the command-line, run the command `pip install -r requirements.txt` while located at folder with code.
 1. Create a new telegram bot token from [@botfather](https://t.me/BotFather).
 1. Get telegram `chat_id` from [@get_id_bot](https://telegram.me/get_id_bot).
    - Alternatively, a `channel_id` can be used as well.
@@ -19,7 +19,7 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 
 1. Use environment variables in the `docker-compse.yml` file to provide your config.
    - See `entrypoint.sh` for environment variable names and the config possibilities.
-   - You can also use a `.env` file, that's how we do it, during development.
+   - You can also use a `.env` file during development.
    - If changing the config parameters, you have to make sure that search and replace will place the right parameter in the `config.yml`
    - Emojis are more tricky therefore defining it with some tricks e.g. `PUMP_EMOJI="! \"\\\\U0001F4B9\""`
 1. On the command line run `docker-compose up -d --build` to create and run the docker image/container.
@@ -37,7 +37,7 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 1. `outlierIntervals`: (0.01 -> 1% , 0.1 -> 10%), modify accordingly based on needs. Avoid setting it too low to avoid noise.
 1. `extractInterval`: Default is `1s`, Interval at which we retrieve the price information from Binance.
 1. `pairsOfInterest`: Default is _USDT_. Other options include BUSD, BTC, ETH etc.
-1. `topReportIntervals`: Default is `1h`,`3h`and `6h` Intervals for top pump and dump reports to be sent, ensure its in chartIntervals + outlierIntervals as well.
+1. `topReportIntervals`: Default is `1h`,`3h`and `6h` Intervals for top pump and dump reports to be sent, ensure it is in chartIntervals + outlierIntervals as well.
 
 ### Optional features to enable
 

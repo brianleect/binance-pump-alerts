@@ -40,16 +40,14 @@ telegram = TelegramSender(
     else config["telegramChatId"],
     retry_interval=ConversionUtils.duration_to_seconds(config["telegramRetryInterval"]),
     bot_emoji=config["botEmoji"],
-    pump_emoji=config["pumpEmoji"],
-    dump_emoji=config["dumpEmoji"],
     top_emoji=config["topEmoji"],
-    new_listing_emoji=config["newListingEmoji"],
+    news_emoji=config["newsEmoji"],
 )
 
 reporter = ReportGenerator(
+    telegram=telegram,
     pump_emoji=config["pumpEmoji"],
     dump_emoji=config["dumpEmoji"],
-    telegram=telegram,
 )
 
 alerter = BinancePumpAndDumpAlerter(

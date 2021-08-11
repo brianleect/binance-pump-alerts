@@ -18,19 +18,19 @@ chartIntervals:
   - 3h
   - 6h
 
-# Values in %  at which an alert is triggered. Ensure interval exists in chartIntervals as well.
+# Values in % at which an alert is triggered. Ensure interval exists in chartIntervals as well.
 outlierIntervals:
-  "1s": 0.02
-  "5s": 0.05
-  "15s": 0.06
-  "30s": 0.08
-  "1m": 0.1
-  "5m": 0.1
-  "15m": 0.15
-  "30m": 0.2
-  "1h": 0.3
-  "3h": 0.4
-  "6h": 0.5
+  "1s": 0.01
+  "5s": 0.02
+  "15s": 0.03
+  "30s": 0.04
+  "1m": 0.05
+  "5m": 0.05
+  "15m": 0.07
+  "30m": 0.1
+  "1h": 0.15
+  "3h": 0.2
+  "6h": 0.25
 
 # Used for telegram bot updates
 
@@ -49,8 +49,8 @@ extractInterval: 1s
 # Watchlist only mode, if enabled, ONLY pairs in watchlist will be monitored
 # E.g. 'ADAUSDT', 'ETHUSDT'
 # watchlist:
-#   - ADAUSDT
-#   - ETHUSDT
+#  - ADAUSDT
+#  - ETHUSDT
 
 # List the trading currency you are interested in. Other options include 'BUSD', 'BTC' , 'ETH'
 pairsOfInterest:
@@ -79,10 +79,10 @@ topReportIntervals:
 
 # Define your own bot emojis.
 botEmoji: ! "\U0001F916" # 🤖
-pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4B9' 💹
-dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉
+pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4C8' 📈 '\U0001F53C'🔼
+dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉 '\U0001F53D'🔽
 topEmoji: ! "\U0001F3C6" # 🏆
-newListingEmoji: ! "\U0001F4F0" # 📰
+newsEmoji: ! "\U0001F4F0" # 📰
 
 # Debug Params (Avoid touching it if there's no issues)
 

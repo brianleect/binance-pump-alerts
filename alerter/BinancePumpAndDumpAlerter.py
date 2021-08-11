@@ -142,7 +142,7 @@ class BinancePumpAndDumpAlerter:
 
         return filtered_assets
 
-    def update_all_monitored_assets_and_send_alert_messages(
+    def update_all_monitored_assets_and_send_news_messages(
         self,
         monitored_assets,
         exchange_assets,
@@ -157,13 +157,12 @@ class BinancePumpAndDumpAlerter:
 
             self.calculate_asset_change(
                 asset,
-                dump_enabled,
                 chart_intervals,
                 extract_interval,
                 outlier_intervals,
             )
 
-            self.report_generator.send_summarized_pump_dump_message(
+            self.report_generator.send_pump_dump_message(
                 asset, chart_intervals, dump_enabled
             )
 
@@ -172,7 +171,6 @@ class BinancePumpAndDumpAlerter:
     def calculate_asset_change(
         self,
         asset,
-        dump_enabled,
         chart_intervals,
         extract_interval,
         outlier_intervals,
@@ -182,12 +180,12 @@ class BinancePumpAndDumpAlerter:
         for interval in chart_intervals:
 
             self.logger.debug(
-                "Calculate asset: %s with interval: %s", asset["symbol"], interval
+                "Calculate asset: %s for interval: %s", asset["symbol"], interval
             )
 
             data_points = int(chart_intervals[interval]["value"] / extract_interval)
 
-            # If data is not avalilable yet after restart for interval, stop here.
+            # If data is not available yet after restart for interval, stop here.
             if data_points >= asset_length:
                 self.logger.debug(
                     "Not enough datapoints (%s/%s) for interval: %s",
@@ -204,8 +202,12 @@ class BinancePumpAndDumpAlerter:
             # Stores change for the interval into asset dict. Only used for top pump dump report.
             asset[interval]["change_top_report"] = change
 
+            # If change is bigger than the outliers set it for reporting,
+            # else reset the value to not produce accidentally spam
             if abs(change) >= outlier_intervals[interval]:
                 asset[interval]["change_alert"] = change
+            else:
+                asset[interval]["change_alert"] = 0
 
         return asset
 
@@ -214,7 +216,9 @@ class BinancePumpAndDumpAlerter:
         initial_time,
         current_time,
         reset_interval,
+        extract_interval,
         assets,
+        chart_intervals,
     ):
         if current_time - initial_time > reset_interval:
 
@@ -222,9 +226,15 @@ class BinancePumpAndDumpAlerter:
             self.logger.debug(message)
             self.telegram.send_generic_message(message)
 
-            # TODO: Do not delete everything, only elements older than the last monitored interval
+            # Do not delete everything, only elements older than the last monitored interval
+            lastInterval = "1s"
+            for interval in chart_intervals:
+                lastInterval = interval
+
+            data_points = int(chart_intervals[lastInterval]["value"] / extract_interval)
+
             for asset in assets:
-                asset["price"] = []
+                asset["price"] = asset["price"][-data_points:]
 
             initial_time = current_time
 
@@ -262,8 +272,7 @@ class BinancePumpAndDumpAlerter:
 
         self.logger.debug("Filtered new listings found: %s.", filtered_symbols_to_add)
 
-        # Sends combined message
-        self.telegram.send_new_listing_message(filtered_symbols_to_add)
+        self.report_generator.send_new_listings(filtered_symbols_to_add)
 
         return filtered_assets
 
@@ -331,7 +340,9 @@ class BinancePumpAndDumpAlerter:
                 self.initial_time,
                 start_loop_time,
                 self.reset_interval,
+                self.extract_interval,
                 filtered_assets,
+                self.chart_intervals,
             )
 
             exchange_assets = self.retrieve_exchange_assets(
@@ -350,7 +361,7 @@ class BinancePumpAndDumpAlerter:
                 # Reset initial exchange asset
                 initial_assets = exchange_assets
 
-            filtered_assets = self.update_all_monitored_assets_and_send_alert_messages(
+            filtered_assets = self.update_all_monitored_assets_and_send_news_messages(
                 filtered_assets,
                 exchange_assets,
                 self.dump_enabled,
