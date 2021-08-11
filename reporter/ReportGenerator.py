@@ -1,7 +1,7 @@
 import logging
 
 
-class BinanceReportGenerator:
+class ReportGenerator:
     def __init__(
         self,
         pump_emoji,
@@ -11,6 +11,8 @@ class BinanceReportGenerator:
         self.pump_emoji = pump_emoji
         self.dump_emoji = dump_emoji
         self.telegram = telegram
+
+        self.logger = logging.getLogger("report-generator")
 
     def send_summarized_pump_dump_message(
         self,

@@ -1,2 +1,1 @@
-from .BinanceReportGenerator import BinanceReportGenerator
 from .BinancePumpAndDumpAlerter import BinancePumpAndDumpAlerter

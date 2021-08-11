@@ -70,7 +70,7 @@ class TelegramSender:
     def send_new_listing_message(self, symbols_to_add, is_alert_chat=False):
         message = """{0} *New Listings*
                      {1} new pairs found, adding to monitored list.
-        
+
                      *Adding Pairs:*
                      """
         for symbol in symbols_to_add:

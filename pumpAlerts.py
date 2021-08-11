@@ -2,21 +2,10 @@ import colorlog, logging
 import os
 import yaml
 
-from alerter import BinancePumpAndDumpAlerter, BinanceReportGenerator
+from alerter import BinancePumpAndDumpAlerter
+from reporter import ReportGenerator
 from sender import TelegramSender
-
-
-def duration_to_seconds(duration):
-    unit = duration[-1]
-    if unit == "s":
-        unit = 1
-    elif unit == "m":
-        unit = 60
-    elif unit == "h":
-        unit = 3600
-
-    return int(duration[:-1]) * unit
-
+from utils import ConversionUtils
 
 # Read config
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -49,15 +38,19 @@ telegram = TelegramSender(
     alert_chat_id=config["telegramAlertChatId"]
     if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0
     else config["telegramChatId"],
-    retry_interval=duration_to_seconds(config["telegramRetryInterval"]),
+    retry_interval=ConversionUtils.duration_to_seconds(config["telegramRetryInterval"]),
     bot_emoji=config["botEmoji"],
     pump_emoji=config["pumpEmoji"],
     dump_emoji=config["dumpEmoji"],
-    top_emoji=config["topEmoji"], 
+    top_emoji=config["topEmoji"],
     new_listing_emoji=config["newListingEmoji"],
 )
 
-reporter = BinanceReportGenerator(pump_emoji=config["pumpEmoji"], dump_emoji=config["dumpEmoji"], telegram=telegram,)
+reporter = ReportGenerator(
+    pump_emoji=config["pumpEmoji"],
+    dump_emoji=config["dumpEmoji"],
+    telegram=telegram,
+)
 
 alerter = BinancePumpAndDumpAlerter(
     api_url=config["apiUrl"],
@@ -66,9 +59,9 @@ alerter = BinancePumpAndDumpAlerter(
     chart_intervals=config["chartIntervals"],
     outlier_intervals=config["outlierIntervals"],
     top_report_intervals=config["topReportIntervals"],
-    extract_interval=duration_to_seconds(config["extractInterval"]),
-    retry_interval=duration_to_seconds(config["priceRetryInterval"]),
-    reset_interval=duration_to_seconds(config["resetInterval"]),
+    extract_interval=ConversionUtils.duration_to_seconds(config["extractInterval"]),
+    retry_interval=ConversionUtils.duration_to_seconds(config["priceRetryInterval"]),
+    reset_interval=ConversionUtils.duration_to_seconds(config["resetInterval"]),
     top_pump_enabled=config["topPumpEnabled"],
     top_dump_enabled=config["topDumpEnabled"],
     additional_statistics_enabled=config["additionalStatsEnabled"],
@@ -78,4 +71,5 @@ alerter = BinancePumpAndDumpAlerter(
     telegram=telegram,
     report_generator=reporter,
 )
+
 alerter.run()

@@ -1,7 +1,9 @@
 import logging
 import requests
 import time
+
 from time import sleep
+from utils import ConversionUtils
 
 
 class BinancePumpAndDumpAlerter:
@@ -46,29 +48,19 @@ class BinancePumpAndDumpAlerter:
         self.chart_intervals = {}
         for interval in chart_intervals:
             self.chart_intervals[interval] = {}
-            self.chart_intervals[interval]["value"] = self.duration_to_seconds(interval)
+            self.chart_intervals[interval][
+                "value"
+            ] = ConversionUtils.duration_to_seconds(interval)
 
         self.top_report_intervals = {}
         for interval in top_report_intervals:
             self.top_report_intervals[interval] = {}
             self.top_report_intervals[interval]["start"] = self.initial_time
-            self.top_report_intervals[interval]["value"] = self.duration_to_seconds(
-                interval
-            )
+            self.top_report_intervals[interval][
+                "value"
+            ] = ConversionUtils.duration_to_seconds(interval)
 
         self.logger = logging.getLogger("pump-and-dump-alerter")
-
-    @staticmethod
-    def duration_to_seconds(duration):
-        unit = duration[-1]
-        if unit == "s":
-            unit = 1
-        elif unit == "m":
-            unit = 60
-        elif unit == "h":
-            unit = 3600
-
-        return int(duration[:-1]) * unit
 
     @staticmethod
     def extract_ticker_data(symbol, assets):
