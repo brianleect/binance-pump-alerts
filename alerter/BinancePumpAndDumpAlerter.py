@@ -291,7 +291,7 @@ class BinancePumpAndDumpAlerter:
                     "Sending out top pump dump report. Interval: %s.", interval
                 )
 
-                self.send_top_pump_dump_statistics_report(
+                self.report_generator.send_top_pump_dump_statistics_report(
                     assets,
                     interval,
                     top_pump_enabled,
