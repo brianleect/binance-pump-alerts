@@ -2,7 +2,7 @@ import colorlog, logging
 import os
 import yaml
 
-from alerter import BinancePumpAndDumpAlerter
+from alerter import BinancePumpAndDumpAlerter, BinanceReportGenerator
 from sender import TelegramSender
 
 
@@ -53,9 +53,11 @@ telegram = TelegramSender(
     bot_emoji=config["botEmoji"],
     pump_emoji=config["pumpEmoji"],
     dump_emoji=config["dumpEmoji"],
-    top_emoji=config["topEmoji"],
+    top_emoji=config["topEmoji"], 
     new_listing_emoji=config["newListingEmoji"],
 )
+
+reporter = BinanceReportGenerator(pump_emoji=config["pumpEmoji"], dump_emoji=config["dumpEmoji"], telegram=telegram,)
 
 alerter = BinancePumpAndDumpAlerter(
     api_url=config["apiUrl"],
@@ -74,5 +76,6 @@ alerter = BinancePumpAndDumpAlerter(
     dump_enabled=config["dumpEnabled"],
     check_new_listing_enabled=config["checkNewListingEnabled"],
     telegram=telegram,
+    report_generator=reporter,
 )
 alerter.run()

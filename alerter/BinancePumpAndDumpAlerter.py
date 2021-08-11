@@ -23,6 +23,7 @@ class BinancePumpAndDumpAlerter:
         dump_enabled,
         check_new_listing_enabled,
         telegram,
+        report_generator,
     ):
         self.api_url = api_url
         self.watchlist = watchlist
@@ -38,6 +39,7 @@ class BinancePumpAndDumpAlerter:
         self.dump_enabled = dump_enabled
         self.check_new_listing_enabled = check_new_listing_enabled
         self.telegram = telegram
+        self.report_generator = report_generator
 
         self.initial_time = time.time()
 
@@ -108,14 +110,16 @@ class BinancePumpAndDumpAlerter:
                 self.logger.debug("Ignoring symbol not in watchlist: %s.", symbol)
                 return False
 
+        # TODO: Make this filtering more stable. Leverage should be at the end of the first
+        # part of the symbol, which needs to be in pairsOfInterest.
+
         # Removing leverage symbols
         if (
             ("UP" in symbol)
             or ("DOWN" in symbol)
             or ("BULL" in symbol)
             or ("BEAR" in symbol)
-            or ("SUPER" in symbol)
-        ):
+        ) and ("SUPER" not in symbol):
             self.logger.debug("Ignoring leverage symbol: %s.", symbol)
             return False
 
@@ -164,7 +168,9 @@ class BinancePumpAndDumpAlerter:
                 outlier_intervals,
             )
 
-            self.send_summarized_pump_dump_message(asset, chart_intervals, dump_enabled)
+            self.report_generator.send_summarized_pump_dump_message(
+                asset, chart_intervals, dump_enabled
+            )
 
         return monitored_assets
 
@@ -385,96 +391,3 @@ class BinancePumpAndDumpAlerter:
                 sleep_time = start_loop_time + self.extract_interval - end_loop_time
                 self.logger.debug("Now sleeping %f seconds.", sleep_time)
                 sleep(sleep_time)
-
-    def send_summarized_pump_dump_message(
-        self,
-        asset,
-        chart_intervals,
-        dump_enabled=True,
-    ):
-        for interval in chart_intervals:
-
-            change = asset[interval]["change_alert"]
-
-            # TODO: Send summarized alert messages to reduce
-            if change > 0:
-                self.telegram.send_pump_message(
-                    interval,
-                    asset["symbol"],
-                    change,
-                    asset["price"][-1],
-                )
-
-            if change < 0 and dump_enabled:
-                self.telegram.send_dump_message(
-                    interval,
-                    asset["symbol"],
-                    change,
-                    asset["price"][-1],
-                )
-
-    def send_top_pump_dump_statistics_report(
-        self,
-        assets,
-        interval,
-        top_pump_enabled=True,
-        top_dump_enabled=True,
-        additional_stats_enabled=True,
-        no_of_reported_coins=5,
-    ):
-        message = "*[{0} Interval]*\n\n".format(interval)
-
-        if top_pump_enabled:
-            pump_sorted_list = sorted(assets, key=lambda i: i[interval], reverse=True)[
-                0:no_of_reported_coins
-            ]
-
-            message += "*Top {0} Pumps*\n".format(no_of_reported_coins)
-
-            for asset in pump_sorted_list:
-                message += "- {0}: _{1:.2f}_%\n".format(
-                    asset["symbol"], asset[interval] * 100
-                )
-            message += "\n"
-
-        if top_dump_enabled:
-            dump_sorted_list = sorted(assets, key=lambda i: i[interval])[
-                0:no_of_reported_coins
-            ]
-
-            message += "*Top {0} Dumps*\n".format(no_of_reported_coins)
-
-            for asset in dump_sorted_list:
-                message += "- {0}: _{1:.2f}_%\n".format(
-                    asset["symbol"], asset[interval] * 100
-                )
-
-        if additional_stats_enabled:
-            if top_pump_enabled or top_dump_enabled:
-                message += "\n"
-            message += self.generate_additional_statistics_report(assets, interval)
-
-        self.telegram.send_interval_message(message, is_alert_chat=True)
-
-    def generate_additional_statistics_report(self, assets, interval):
-        up = 0
-        down = 0
-        sum_change = 0
-
-        for asset in assets:
-            if asset[interval] > 0:
-                up += 1
-            elif asset[interval] < 0:
-                down += 1
-
-            sum_change += asset[interval]
-
-        avg_change = sum_change / len(assets)
-
-        return "*Average Change:* {0:.2f}%\n {1} {2} / {3} {4}".format(
-            avg_change * 100,
-            self.pump_emoji,
-            up,
-            self.dump_emoji,
-            down,
-        )
