@@ -96,32 +96,35 @@ class BinancePumpAndDumpAlerter:
                 sleep(retry_interval)
 
     def is_symbol_valid(self, symbol, watchlist, pairs_of_interest):
-        # Filter symbols not in watchlist if set
+        # Filter symbols in watchlist if set - This disables the pairsOfInterest feature
         if len(watchlist) > 0:
             if symbol not in watchlist:
                 self.logger.debug("Ignoring symbol not in watchlist: %s.", symbol)
                 return False
-
-        # TODO: Make this filtering more stable. Leverage should be at the end of the first
-        # part of the symbol, which needs to be in pairsOfInterest.
-
-        # Removing leverage symbols
-        if (
-            ("UP" in symbol)
-            or ("DOWN" in symbol)
-            or ("BULL" in symbol)
-            or ("BEAR" in symbol)
-        ) and ("SUPER" not in symbol):
-            self.logger.debug("Ignoring leverage symbol: %s.", symbol)
-            return False
+            return True
 
         # Filter pairsOfInterest to reduce the noise. E.g. BUSD, USDT, ETH, BTC
-        if (
-            symbol[-4:] not in pairs_of_interest
-            and symbol[-3:] not in pairs_of_interest
-        ):
+        is_in_pairs_of_interest = False
+        for pair in pairs_of_interest:
+            if symbol.endswith(pair):
+                is_in_pairs_of_interest = True
+                break
+
+        if not is_in_pairs_of_interest:
             self.logger.debug("Ignoring symbol not in pairsOfInterests: %s.", symbol)
             return False
+
+        # Filter leverage symbols
+        for pair in pairs_of_interest:
+            coin = symbol.replace(pair, "")
+            if (
+                coin.endswith("UP")
+                or coin.endswith("DOWN")
+                or coin.endswith("BULL")
+                or coin.endswith("BEAR")
+            ):
+                self.logger.debug("Ignoring leverage symbol: %s.", symbol)
+                return False
 
         return True
 
