@@ -280,7 +280,6 @@ class BinancePumpAndDumpAlerter:
                 current_time
                 > top_report_intervals[interval]["start"]
                 + top_report_intervals[interval]["value"]
-                + 8  # Magic number ;)
             ):
                 # Update time for new trigger
                 top_report_intervals[interval]["start"] = current_time
