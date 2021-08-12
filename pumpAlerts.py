@@ -50,6 +50,7 @@ def main():
 
     reporter = ReportGenerator(
         telegram=telegram,
+        alert_skip_threshold=config["alertSkipThreshold"],
         pump_emoji=config["pumpEmoji"],
         dump_emoji=config["dumpEmoji"],
     )

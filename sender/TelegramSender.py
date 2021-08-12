@@ -50,7 +50,7 @@ class TelegramSender:
                 break
             except Exception as e:
                 self.logger.error(
-                    "Error sending message with Telegram bot. Message: %s RetryInterval: %s. Exception: %s",
+                    "Error sending message with Telegram bot. Message: %s RetryInterval: %s Exception: %s.",
                     message,
                     self.retry_interval,
                     e,

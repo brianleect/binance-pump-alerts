@@ -5,10 +5,12 @@ class ReportGenerator:
     def __init__(
         self,
         telegram,
+        alert_skip_threshold,
         pump_emoji="\U0001F7E2",  # 🟢
         dump_emoji="\U0001F534",  # 🔴
     ):
         self.telegram = telegram
+        self.alert_skip_threshold = alert_skip_threshold
         self.pump_emoji = pump_emoji
         self.dump_emoji = dump_emoji
 
@@ -90,6 +92,26 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
                 )
 
         if no_of_alerts == 1:
+
+            # Skipping notification if the change is to low and we are on higher intervals
+            change_last = asset[tmpInterval]["change_last"]
+            change_delta = tmpChange - change_last
+
+            if (
+                tmpChange != 0
+                and (abs(change_delta) < self.alert_skip_threshold)
+                and chart_intervals[tmpInterval]["value"] > 3
+            ):
+                self.logger.warning(
+                    "Change for asset: %s [%s] from %s to: %s is to low: %s. Skipping this alert.",
+                    asset["symbol"],
+                    tmpInterval,
+                    tmpChange,
+                    change_last,
+                    change_delta,
+                )
+                return
+
             if tmpChange > 0:
                 self.send_pump_message(
                     asset["symbol"],
@@ -131,13 +153,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
         if not top_pump_enabled or not top_dump_enabled:
             return
 
-        message = """\
-*[{0} Interval]*
-
-\
-        """.format(
-            interval
-        )
+        message = "*[{0} Interval]*\n\n".format(interval)
 
         if top_pump_enabled:
             pump_sorted_list = sorted(

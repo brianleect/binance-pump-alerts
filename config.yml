@@ -73,7 +73,6 @@ additionalStatsEnabled: True
 noOfReportedCoins: 5
 # Intervals for top pump and dump to be sent, ensure its in chartIntervals + outlierIntervals as well
 topReportIntervals:
-  - 15m
   - 30m
   - 1h
   - 3h
@@ -90,6 +89,8 @@ newsEmoji: ! "\U0001F4F0" # 📰
 
 # If False we do not print unnecessary messages
 debug: False
+# Skip alert at higher timeframes when change % did not change value by threshold
+alertSkipThreshold: 0.005
 # Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
 resetInterval: 12h
 # In the case of get price fail, this is the time delay before re-attempt

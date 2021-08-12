@@ -60,6 +60,9 @@ process_config() {
     if [[ -n $DEBUG ]]; then
         sed -i "s/debug.*/debug: ${DEBUG}/" config.yml
     fi
+    if [[ -n $ALERT_SKIP_THRESHOLD ]]; then
+        sed -i "s/alertSkipThreshold.*/alertSkipThreshold: ${ALERT_SKIP_THRESHOLD}/" config.yml
+    fi
     if [[ -n $RESET_INTERVAL ]]; then
         sed -i "s/resetInterval.*/resetInterval: ${RESET_INTERVAL}/" config.yml
     fi

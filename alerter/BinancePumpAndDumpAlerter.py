@@ -76,6 +76,7 @@ class BinancePumpAndDumpAlerter:
             asset[interval] = {}
             asset[interval]["change_alert"] = 0
             asset[interval]["change_top_report"] = 0
+            asset[interval]["change_last"] = 0
 
         return asset
 
@@ -177,10 +178,6 @@ class BinancePumpAndDumpAlerter:
 
         for interval in chart_intervals:
 
-            self.logger.debug(
-                "Calculate asset: %s for interval: %s", asset["symbol"], interval
-            )
-
             data_points = int(chart_intervals[interval]["value"] / extract_interval)
 
             # If data is not available yet after restart for interval, stop here.
@@ -194,11 +191,20 @@ class BinancePumpAndDumpAlerter:
                 break
 
             # Gets change in % from last alert trigger.
-            price_delta = asset["price"][-1] - asset["price"][-1 - data_points]
+            price_delta = asset["price"][-1] - asset["price"][-data_points]
             change = price_delta / asset["price"][-1]
+            self.logger.debug(
+                "Calculated asset: %s for interval: %s with change: %s",
+                asset["symbol"],
+                interval,
+                change,
+            )
 
             # Stores change for the interval into asset dict. Only used for top pump dump report.
             asset[interval]["change_top_report"] = change
+
+            # Set last change for next interval iteration
+            asset[interval]["change_last"] = asset[interval]["change_alert"]
 
             # If change is bigger than the outliers set it for reporting,
             # else reset the value to not produce accidentally spam
@@ -381,7 +387,7 @@ class BinancePumpAndDumpAlerter:
             end_loop_time = time.time()
 
             self.logger.info(
-                "Extracting loop started at %d and finished at %d. It took %f seconds.",
+                "Extracting loop started at %d and finished at %d. Taking %f seconds.",
                 start_loop_time,
                 end_loop_time,
                 end_loop_time - start_loop_time,
