@@ -73,6 +73,8 @@ additionalStatsEnabled: True
 noOfReportedCoins: 5
 # Intervals for top pump and dump to be sent, ensure its in chartIntervals + outlierIntervals as well
 topReportIntervals:
+  - 15m
+  - 30m
   - 1h
   - 3h
   - 6h
@@ -93,6 +95,6 @@ resetInterval: 12h
 # In the case of get price fail, this is the time delay before re-attempt
 priceRetryInterval: 5s
 # If telegram message fails to send, this is the time delay before re-attempt
-telegramRetryInterval: 30s
+telegramRetryInterval: 2s
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True

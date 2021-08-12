@@ -14,28 +14,37 @@ class ReportGenerator:
 
         self.logger = logging.getLogger("report-generator")
 
-    def send_pump_message(self, symbol, interval, change, price, is_alert_chat=False):
+    def send_pump_message(self, symbol, interval, change, price):
         self.telegram.send_message(
-            "{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
-                self.dump_emoji, symbol, interval, change * 100, price
+            """\
+{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_
+
+Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
+            """.format(
+                self.pump_emoji, symbol, interval, change * 100, price
             ),
-            is_alert_chat,
+            is_alert_chat=False,
         )
 
-    def send_dump_message(self, symbol, interval, change, price, is_alert_chat=False):
+    def send_dump_message(self, symbol, interval, change, price):
         self.telegram.send_message(
-            "{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
+            """\
+{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_
+
+Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
+            """.format(
                 self.dump_emoji, symbol, interval, change * 100, price
             ),
-            is_alert_chat,
+            is_alert_chat=False,
         )
 
     def send_new_listings(self, symbols_to_add):
-        message = """*New Listings*
-                     {0} new pairs found, adding to monitored list.
+        message = """\
+*New Listings*"
+{0} new pairs found, adding to monitored list."
 
-                     *Adding Pairs:*
-                     """.format(
+*Adding Pairs:*\
+            """.format(
             len(symbols_to_add)
         )
 
@@ -98,13 +107,16 @@ class ReportGenerator:
 
         # Send summarized alert if multiple at the same extraction
         if no_of_alerts > 1:
-            message = (
-                "*{0}* | {1} Summarized Alerts\n\n".format(
-                    asset["symbol"], no_of_alerts
-                )
-                + message
+            news_message = """\
+*{0}* | {1} Summarized Alerts
+
+{2}
+Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
+            """.format(
+                asset["symbol"], no_of_alerts, message
             )
-            self.telegram.send_news_message(message)
+
+            self.telegram.send_news_message(news_message)
 
     def send_top_pump_dump_statistics_report(
         self,
@@ -115,7 +127,17 @@ class ReportGenerator:
         additional_stats_enabled=True,
         no_of_reported_coins=5,
     ):
-        message = "*[{0} Interval]*\n\n".format(interval)
+
+        if not top_pump_enabled or not top_dump_enabled:
+            return
+
+        message = """\
+*[{0} Interval]*
+
+\
+        """.format(
+            interval
+        )
 
         if top_pump_enabled:
             pump_sorted_list = sorted(

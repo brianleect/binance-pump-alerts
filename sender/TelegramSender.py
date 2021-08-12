@@ -9,7 +9,7 @@ class TelegramSender:
         token,
         chat_id,
         alert_chat_id=0,
-        retry_interval=30,
+        retry_interval=2,
         bot_emoji="\U0001F916",  # 🤖
         top_emoji="\U0001F3C6",  # 🏆
         news_emoji="\U0001F4F0",  # 📰
@@ -36,15 +36,16 @@ class TelegramSender:
     def is_alert_chat_enabled(self):
         return self.alert_chat_id != 0 and self.alert_chat_id != self.chat_id
 
-    async def send_message(self, message, is_alert_chat=False):
+    def send_message(self, message, is_alert_chat=False):
         while True:
             try:
                 self.logger.debug(message)
 
-                self.bot.sendMessage(
+                self.bot.send_message(
                     chat_id=self.chat_id if not is_alert_chat else self.alert_chat_id,
                     text=message,
                     parse_mode=ParseMode.MARKDOWN,
+                    disable_web_page_preview=True,
                 )
                 break
             except Exception as e:
