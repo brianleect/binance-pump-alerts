@@ -32,42 +32,52 @@ logger = logging.getLogger("binance-pump-alerts-app")
 # Logg whole configuration during the startup
 logger.debug("Config: %s", config)
 
-telegram = TelegramSender(
-    token=config["telegramToken"],
-    chat_id=config["telegramChatId"],
-    alert_chat_id=config["telegramAlertChatId"]
-    if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0
-    else config["telegramChatId"],
-    retry_interval=ConversionUtils.duration_to_seconds(config["telegramRetryInterval"]),
-    bot_emoji=config["botEmoji"],
-    top_emoji=config["topEmoji"],
-    news_emoji=config["newsEmoji"],
-)
 
-reporter = ReportGenerator(
-    telegram=telegram,
-    pump_emoji=config["pumpEmoji"],
-    dump_emoji=config["dumpEmoji"],
-)
+def main():
+    telegram = TelegramSender(
+        token=config["telegramToken"],
+        chat_id=config["telegramChatId"],
+        alert_chat_id=config["telegramAlertChatId"]
+        if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0
+        else config["telegramChatId"],
+        retry_interval=ConversionUtils.duration_to_seconds(
+            config["telegramRetryInterval"]
+        ),
+        bot_emoji=config["botEmoji"],
+        top_emoji=config["topEmoji"],
+        news_emoji=config["newsEmoji"],
+    )
 
-alerter = BinancePumpAndDumpAlerter(
-    api_url=config["apiUrl"],
-    watchlist=[] if "watchlist" not in config else config["watchlist"],
-    pairs_of_interest=config["pairsOfInterest"],
-    chart_intervals=config["chartIntervals"],
-    outlier_intervals=config["outlierIntervals"],
-    top_report_intervals=config["topReportIntervals"],
-    extract_interval=ConversionUtils.duration_to_seconds(config["extractInterval"]),
-    retry_interval=ConversionUtils.duration_to_seconds(config["priceRetryInterval"]),
-    reset_interval=ConversionUtils.duration_to_seconds(config["resetInterval"]),
-    top_pump_enabled=config["topPumpEnabled"],
-    top_dump_enabled=config["topDumpEnabled"],
-    additional_statistics_enabled=config["additionalStatsEnabled"],
-    no_of_reported_coins=config["noOfReportedCoins"],
-    dump_enabled=config["dumpEnabled"],
-    check_new_listing_enabled=config["checkNewListingEnabled"],
-    telegram=telegram,
-    report_generator=reporter,
-)
+    reporter = ReportGenerator(
+        telegram=telegram,
+        pump_emoji=config["pumpEmoji"],
+        dump_emoji=config["dumpEmoji"],
+    )
 
-alerter.run()
+    alerter = BinancePumpAndDumpAlerter(
+        api_url=config["apiUrl"],
+        watchlist=[] if "watchlist" not in config else config["watchlist"],
+        pairs_of_interest=config["pairsOfInterest"],
+        chart_intervals=config["chartIntervals"],
+        outlier_intervals=config["outlierIntervals"],
+        top_report_intervals=config["topReportIntervals"],
+        extract_interval=ConversionUtils.duration_to_seconds(config["extractInterval"]),
+        retry_interval=ConversionUtils.duration_to_seconds(
+            config["priceRetryInterval"]
+        ),
+        reset_interval=ConversionUtils.duration_to_seconds(config["resetInterval"]),
+        top_pump_enabled=config["topPumpEnabled"],
+        top_dump_enabled=config["topDumpEnabled"],
+        additional_statistics_enabled=config["additionalStatsEnabled"],
+        no_of_reported_coins=config["noOfReportedCoins"],
+        dump_enabled=config["dumpEnabled"],
+        check_new_listing_enabled=config["checkNewListingEnabled"],
+        telegram=telegram,
+        report_generator=reporter,
+    )
+
+    alerter.run()
+
+
+if __name__ == "__main__":
+    main()
