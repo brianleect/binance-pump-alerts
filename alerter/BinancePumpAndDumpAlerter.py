@@ -166,8 +166,6 @@ class BinancePumpAndDumpAlerter:
                 asset, chart_intervals, dump_enabled
             )
 
-        return monitored_assets
-
     def calculate_asset_change(
         self,
         asset,
@@ -288,6 +286,7 @@ class BinancePumpAndDumpAlerter:
     ):
 
         for interval in top_report_intervals:
+
             if (
                 current_time
                 > top_report_intervals[interval]["start"]
@@ -308,8 +307,6 @@ class BinancePumpAndDumpAlerter:
                     additional_stats_enabled,
                     no_of_reported_coins,
                 )
-
-            return top_report_intervals
 
     def run(self):
 
@@ -361,7 +358,7 @@ class BinancePumpAndDumpAlerter:
                 # Reset initial exchange asset
                 initial_assets = exchange_assets
 
-            filtered_assets = self.update_all_monitored_assets_and_send_news_messages(
+            self.update_all_monitored_assets_and_send_news_messages(
                 filtered_assets,
                 exchange_assets,
                 self.dump_enabled,
@@ -370,16 +367,14 @@ class BinancePumpAndDumpAlerter:
                 self.outlier_intervals,
             )
 
-            self.top_report_intervals = (
-                self.check_and_send_top_pump_dump_statistics_report(
-                    filtered_assets,
-                    start_loop_time,
-                    self.top_report_intervals,
-                    self.top_pump_enabled,
-                    self.top_dump_enabled,
-                    self.additional_statistics_enabled,
-                    self.no_of_reported_coins,
-                )
+            self.check_and_send_top_pump_dump_statistics_report(
+                filtered_assets,
+                start_loop_time,
+                self.top_report_intervals,
+                self.top_pump_enabled,
+                self.top_dump_enabled,
+                self.additional_statistics_enabled,
+                self.no_of_reported_coins,
             )
 
             # Sleeps for the remainder of 1s, or loops through if extraction takes longer
