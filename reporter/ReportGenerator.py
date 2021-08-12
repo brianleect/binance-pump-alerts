@@ -14,18 +14,18 @@ class ReportGenerator:
 
         self.logger = logging.getLogger("report-generator")
 
-    def send_pump_message(self, interval, symbol, change, price, is_alert_chat=False):
+    def send_pump_message(self, symbol, interval, change, price, is_alert_chat=False):
         self.telegram.send_message(
-            "{0} *[{1} Interval] {2}* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
-                self.pump_emoji, interval, symbol, change * 100, price
+            "{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
+                self.dump_emoji, symbol, interval, change * 100, price
             ),
             is_alert_chat,
         )
 
-    def send_dump_message(self, interval, symbol, change, price, is_alert_chat=False):
+    def send_dump_message(self, symbol, interval, change, price, is_alert_chat=False):
         self.telegram.send_message(
-            "{0} *[{1} Interval] {2}* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
-                self.dump_emoji, interval, symbol, change * 100, price
+            "{0} *{1} [{2} Interval]* | Change: _{3:.3f}%_ | Price: _{4:.10f}_".format(
+                self.dump_emoji, symbol, interval, change * 100, price
             ),
             is_alert_chat,
         )
@@ -50,7 +50,6 @@ class ReportGenerator:
         chart_intervals,
         dump_enabled=True,
     ):
-        change = 0
         tmpChange = 0
         tmpInterval = 0
         no_of_alerts = 0
@@ -82,17 +81,17 @@ class ReportGenerator:
                 )
 
         if no_of_alerts == 1:
-            if change > 0:
+            if tmpChange > 0:
                 self.send_pump_message(
-                    tmpInterval,
                     asset["symbol"],
+                    tmpInterval,
                     tmpChange,
                     asset["price"][-1],
                 )
-            if change < 0 and dump_enabled:
+            if tmpChange < 0 and dump_enabled:
                 self.send_dump_message(
-                    tmpInterval,
                     asset["symbol"],
+                    tmpInterval,
                     tmpChange,
                     asset["price"][-1],
                 )

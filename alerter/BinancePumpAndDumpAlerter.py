@@ -326,7 +326,7 @@ class BinancePumpAndDumpAlerter:
 
         message = "*Bot has started.* Following _{0}_ pairs."
         self.telegram.send_generic_message(message, len(filtered_assets))
-        if self.telegram.is_alert_chat_enabled:
+        if self.telegram.is_alert_chat_enabled():
             self.telegram.send_generic_message(
                 message,
                 len(filtered_assets),

@@ -38,7 +38,7 @@ outlierIntervals:
 telegramToken: mySecretToken
 # Insert Chat ID obtained from @get_id_bot here
 telegramChatId: mySecretChatId
-# Insert Chat ID for top pump dump alert, if left on `0` it'll send the message to telegramChatId
+# Insert Chat ID for top pump dump alert, if left on `0` it'll send the message to telegram chat id
 telegramAlertChatId: 0
 
 # Useful Params
