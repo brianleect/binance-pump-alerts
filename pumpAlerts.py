@@ -9,7 +9,15 @@ from utils import ConversionUtils
 
 # Read config
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-yaml_file = open(os.path.join(__location__, "config.yml"), "r", encoding="utf-8")
+config_file = "config.yml"
+
+# Using dev config while development
+config_dev_file = "config.dev.yml"
+if os.path.isfile(config_dev_file):
+    config_file = config_dev_file
+
+yaml_file = open(os.path.join(__location__, config_file), "r", encoding="utf-8")
+
 config = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
 # Define the log format
@@ -30,6 +38,7 @@ colorlog.basicConfig(
 logger = logging.getLogger("binance-pump-alerts-app")
 
 # Logg whole configuration during the startup
+logger.info("Using config file: %s", config_file)
 logger.debug("Config: %s", config)
 
 

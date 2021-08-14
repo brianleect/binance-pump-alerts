@@ -74,8 +74,7 @@ class BinancePumpAndDumpAlerter:
 
         for interval in chart_intervals:
             asset[interval] = {}
-            asset[interval]["change_alert"] = 0
-            asset[interval]["change_top_report"] = 0
+            asset[interval]["change_current"] = 0
             asset[interval]["change_last"] = 0
 
         return asset
@@ -160,11 +159,13 @@ class BinancePumpAndDumpAlerter:
                 asset,
                 chart_intervals,
                 extract_interval,
-                outlier_intervals,
             )
 
             self.report_generator.send_pump_dump_message(
-                asset, chart_intervals, dump_enabled
+                asset,
+                chart_intervals,
+                outlier_intervals,
+                dump_enabled,
             )
 
     def calculate_asset_change(
@@ -172,7 +173,6 @@ class BinancePumpAndDumpAlerter:
         asset,
         chart_intervals,
         extract_interval,
-        outlier_intervals,
     ):
         asset_length = len(asset["price"])
 
@@ -189,9 +189,8 @@ class BinancePumpAndDumpAlerter:
                     interval,
                 )
                 break
-
             # Gets change in % from last alert trigger.
-            price_delta = asset["price"][-1] - asset["price"][-data_points]
+            price_delta = asset["price"][-1] - asset["price"][-1-data_points]
             change = price_delta / asset["price"][-1]
             self.logger.debug(
                 "Calculated asset: %s for interval: %s with change: %s",
@@ -200,18 +199,11 @@ class BinancePumpAndDumpAlerter:
                 change,
             )
 
-            # Stores change for the interval into asset dict. Only used for top pump dump report.
-            asset[interval]["change_top_report"] = change
-
             # Set last change for next interval iteration
-            asset[interval]["change_last"] = asset[interval]["change_alert"]
+            asset[interval]["change_last"] = asset[interval]["change_current"]
 
-            # If change is bigger than the outliers set it for reporting,
-            # else reset the value to not produce accidentally spam
-            if abs(change) >= outlier_intervals[interval]:
-                asset[interval]["change_alert"] = change
-            else:
-                asset[interval]["change_alert"] = 0
+            # Stores change for the current interval into asset dict.
+            asset[interval]["change_current"] = change
 
         return asset
 
@@ -228,7 +220,7 @@ class BinancePumpAndDumpAlerter:
 
             message = "Emptying price data to prevent memory errors."
             self.logger.debug(message)
-            self.telegram.send_generic_message(message)
+            self.telegram.send_generic_message(message, is_alert_chat=True)
 
             # Do not delete everything, only elements older than the last monitored interval
             lastInterval = "1s"
@@ -238,7 +230,7 @@ class BinancePumpAndDumpAlerter:
             data_points = int(chart_intervals[lastInterval]["value"] / extract_interval)
 
             for asset in assets:
-                asset["price"] = asset["price"][-data_points:]
+                asset["price"] = asset["price"][-1-data_points:]
 
             initial_time = current_time
 
@@ -339,15 +331,6 @@ class BinancePumpAndDumpAlerter:
         while True:
             start_loop_time = time.time()
 
-            self.initial_time = self.reset_prices_data_when_due(
-                self.initial_time,
-                start_loop_time,
-                self.reset_interval,
-                self.extract_interval,
-                filtered_assets,
-                self.chart_intervals,
-            )
-
             exchange_assets = self.retrieve_exchange_assets(
                 self.api_url, self.retry_interval
             )
@@ -381,6 +364,15 @@ class BinancePumpAndDumpAlerter:
                 self.top_dump_enabled,
                 self.additional_statistics_enabled,
                 self.no_of_reported_coins,
+            )
+
+            self.initial_time = self.reset_prices_data_when_due(
+                self.initial_time,
+                start_loop_time,
+                self.reset_interval,
+                self.extract_interval,
+                filtered_assets,
+                self.chart_intervals,
             )
 
             # Sleeps for the remainder of 1s, or loops through if extraction takes longer

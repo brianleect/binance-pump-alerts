@@ -9,6 +9,7 @@ services:
     # image: brianleect/binance-pump-alerts:latest
     restart: "no"
     environment:
+      - CONFIG_FILE=config.dev.yml
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - TELEGRAM_ALERT_CHAT_ID=${TELEGRAM_ALERT_CHAT_ID}

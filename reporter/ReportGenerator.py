@@ -59,20 +59,41 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
         self,
         asset,
         chart_intervals,
+        outlier_intervals,
         dump_enabled=True,
     ):
-        tmpChange = 0
-        tmpInterval = 0
+        change_last = 0
+        change_biggest_delta = 0
+        interval_last = 0
         no_of_alerts = 0
         message = ""
+
         for interval in chart_intervals:
 
-            change = asset[interval]["change_alert"]
+            change = asset[interval]["change_current"]
+
+            # Skip report if no outlier
+            if abs(change) < outlier_intervals[interval]:
+                self.logger.debug(
+                    "Change for asset: %s for interval: %s is to low: %s. Skipping report creation.",
+                    asset["symbol"],
+                    interval,
+                    change,
+                )
+                continue
+
+            # Remember biggest change of all intervals, to skip later notification
+            change_last = asset[interval]["change_last"]
+            change_delta = change - change_last
+
+            if abs(change_delta) > abs(change_biggest_delta):
+                change_biggest_delta = change_delta
+
+            # Remember the total number of alerts
+            no_of_alerts += 1
+            interval_last = interval
 
             if change > 0:
-                tmpChange = change
-                tmpInterval = interval
-                no_of_alerts += 1
                 message += "{0} *[{1} Interval]* Change: _{2:.3f}%_ | Price: _{3:.10f}_\n".format(
                     self.pump_emoji,
                     interval,
@@ -81,9 +102,6 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
                 )
 
             if change < 0 and dump_enabled:
-                tmpChange = change
-                tmpInterval = interval
-                no_of_alerts += 1
                 message += "{0} *[{1} Interval]* Change: _{2:.3f}%_ | Price: _{3:.10f}_\n".format(
                     self.dump_emoji,
                     interval,
@@ -91,39 +109,29 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
                     asset["price"][-1],
                 )
 
+        # Skip alert if change is not big enough to avoid spam
+        if abs(change_biggest_delta) < (self.alert_skip_threshold / 100):
+            self.logger.debug(
+                "Change for asset: %s on all intervals is to low: %s. Skipping this alert report.",
+                asset["symbol"],
+                change_biggest_delta,
+            )
+            return
+
         if no_of_alerts == 1:
 
-            # Skipping notification if the change is to low and we are on higher intervals
-            change_last = asset[tmpInterval]["change_last"]
-            change_delta = tmpChange - change_last
-
-            if (
-                tmpChange != 0
-                and (abs(change_delta) < self.alert_skip_threshold)
-                and chart_intervals[tmpInterval]["value"] > 3
-            ):
-                self.logger.warning(
-                    "Change for asset: %s [%s] from %s to: %s is to low: %s. Skipping this alert.",
-                    asset["symbol"],
-                    tmpInterval,
-                    tmpChange,
-                    change_last,
-                    change_delta,
-                )
-                return
-
-            if tmpChange > 0:
+            if change_last > 0:
                 self.send_pump_message(
                     asset["symbol"],
-                    tmpInterval,
-                    tmpChange,
+                    interval_last,
+                    change_last,
                     asset["price"][-1],
                 )
-            if tmpChange < 0 and dump_enabled:
+            if change_last < 0 and dump_enabled:
                 self.send_dump_message(
                     asset["symbol"],
-                    tmpInterval,
-                    tmpChange,
+                    interval_last,
+                    change_last,
                     asset["price"][-1],
                 )
 
@@ -158,7 +166,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
         if top_pump_enabled:
             pump_sorted_list = sorted(
                 assets,
-                key=lambda item: item[interval]["change_top_report"],
+                key=lambda item: item[interval]["change_current"],
                 reverse=True,
             )[0:no_of_reported_coins]
 
@@ -168,13 +176,13 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
 
             for asset in pump_sorted_list:
                 message += "- {0}: _{1:.2f}_%\n".format(
-                    asset["symbol"], asset[interval]["change_top_report"] * 100
+                    asset["symbol"], asset[interval]["change_current"] * 100
                 )
             message += "\n"
 
         if top_dump_enabled:
             dump_sorted_list = sorted(
-                assets, key=lambda item: item[interval]["change_top_report"]
+                assets, key=lambda item: item[interval]["change_current"]
             )[0:no_of_reported_coins]
 
             message += "{0} *Top {1} Dumps*\n".format(
@@ -183,7 +191,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
 
             for asset in dump_sorted_list:
                 message += "- {0}: _{1:.2f}_%\n".format(
-                    asset["symbol"], asset[interval]["change_top_report"] * 100
+                    asset["symbol"], asset[interval]["change_current"] * 100
                 )
 
         if additional_stats_enabled:
@@ -199,12 +207,12 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
         sum_change = 0
 
         for asset in assets:
-            if asset[interval]["change_top_report"] > 0:
+            if asset[interval]["change_current"] > 0:
                 up += 1
-            elif asset[interval]["change_top_report"] < 0:
+            elif asset[interval]["change_current"] < 0:
                 down += 1
 
-            sum_change += asset[interval]["change_top_report"]
+            sum_change += asset[interval]["change_current"]
 
         avg_change = sum_change / len(assets)
 

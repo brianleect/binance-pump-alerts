@@ -20,17 +20,17 @@ chartIntervals:
 
 # Values in % at which an alert is triggered. Ensure interval exists in chartIntervals as well.
 outlierIntervals:
-  "1s": 0.01
-  "5s": 0.02
-  "15s": 0.03
-  "30s": 0.04
-  "1m": 0.05
-  "5m": 0.05
-  "15m": 0.07
-  "30m": 0.1
-  "1h": 0.15
-  "3h": 0.2
-  "6h": 0.25
+  "1s": 0.02
+  "5s": 0.05
+  "15s": 0.06
+  "30s": 0.08
+  "1m": 0.1
+  "5m": 0.10
+  "15m": 0.15
+  "30m": 0.20
+  "1h": 0.30
+  "3h": 0.4
+  "6h": 0.5
 
 # Used for telegram bot updates
 
@@ -73,8 +73,6 @@ additionalStatsEnabled: True
 noOfReportedCoins: 5
 # Intervals for top pump and dump to be sent, ensure its in chartIntervals + outlierIntervals as well
 topReportIntervals:
-  - 30m
-  - 1h
   - 3h
   - 6h
 
@@ -89,13 +87,13 @@ newsEmoji: ! "\U0001F4F0" # 📰
 
 # If False we do not print unnecessary messages
 debug: False
-# Skip alert at higher timeframes when change % did not change value by threshold
-alertSkipThreshold: 0.005
-# Interval for clearing array to prevent MEM ERROR can handle up to 12h+ depending on system
-resetInterval: 12h
+# Skip alert at higher timeframes when change in % did not change value by threshold in percentage points
+alertSkipThreshold: 0.75
+# Interval for clearing array to prevent memory can handle up to 12h+ depending on system
+resetInterval: 6h
 # In the case of get price fail, this is the time delay before re-attempt
 priceRetryInterval: 5s
 # If telegram message fails to send, this is the time delay before re-attempt
-telegramRetryInterval: 2s
+telegramRetryInterval: 30s
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True
