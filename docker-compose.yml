@@ -7,10 +7,14 @@ services:
       dockerfile: "./Dockerfile"
     image: binance-pump-alerts
     # image: brianleect/binance-pump-alerts:latest
-    restart: unless-stopped
+    restart: "no"
     environment:
+      - CONFIG_FILE=config.dev.yml
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - TELEGRAM_ALERT_CHAT_ID=${TELEGRAM_ALERT_CHAT_ID}
       - PUMP_EMOJI=${PUMP_EMOJI}
       - DUMP_EMOJI=${DUMP_EMOJI}
+      - NO_OF_REPORTED_COINS=${NO_OF_REPORTED_COINS}
       - DEBUG=${DEBUG}
+      - RESET_INTERVAL=${RESET_INTERVAL}

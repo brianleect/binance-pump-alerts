@@ -1,4 +1,4 @@
-FROM python:3.9.6-slim-buster as base
+FROM python:3.9-slim-buster as base
 
 # Setup env
 ENV LANG C.UTF-8
@@ -45,6 +45,3 @@ USER bpauser
 COPY --chown=bpauser:bpauser . /binance-pump-alerts/
 
 ENTRYPOINT ["./entrypoint.sh", "python", "pumpAlerts.py"]
-
-# Entrypoint for debugging purposes
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
