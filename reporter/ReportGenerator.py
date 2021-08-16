@@ -62,9 +62,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
         outlier_intervals,
         dump_enabled=True,
     ):
-        change_last = 0
         change_biggest_delta = 0
-        interval_last = 0
         no_of_alerts = 0
         message = ""
 
@@ -91,7 +89,6 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
 
             # Remember the total number of alerts
             no_of_alerts += 1
-            interval_last = interval
 
             if change > 0:
                 message += "{0} *[{1} Interval]* Change: _{2:.3f}%_ | Price: _{3:.10f}_\n".format(
@@ -118,27 +115,8 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
             )
             return
 
-        if no_of_alerts == 1:
-
-            if change_last > 0:
-                self.send_pump_message(
-                    asset["symbol"],
-                    interval_last,
-                    change_last,
-                    asset["price"][-1],
-                )
-            if change_last < 0 and dump_enabled:
-                self.send_dump_message(
-                    asset["symbol"],
-                    interval_last,
-                    change_last,
-                    asset["price"][-1],
-                )
-
-        # Send summarized alert if multiple at the same extraction
-        if no_of_alerts > 1:
-            news_message = """\
-*{0}* | {1} Summarized Alerts
+        news_message = """\
+*{0}* | {1} Alert(s)
 
 {2}
 Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
@@ -146,7 +124,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
                 asset["symbol"], no_of_alerts, message
             )
 
-            self.telegram.send_news_message(news_message)
+        self.telegram.send_news_message(news_message)
 
     def send_top_pump_dump_statistics_report(
         self,

@@ -288,7 +288,7 @@ class BinancePumpAndDumpAlerter:
             if (
                 current_time
                 > top_report_intervals[interval]["start"]
-                + top_report_intervals[interval]["value"]
+                + top_report_intervals[interval]["value"] + 1
             ):
                 # Update time for new trigger
                 top_report_intervals[interval]["start"] = current_time
