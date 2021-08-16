@@ -43,7 +43,7 @@ class BinancePumpAndDumpAlerter:
         self.telegram = telegram
         self.report_generator = report_generator
 
-        self.initial_time = time.time()
+        self.initial_time = int(time.time())
 
         self.chart_intervals = {}
         for interval in chart_intervals:
@@ -180,7 +180,7 @@ class BinancePumpAndDumpAlerter:
 
         for interval in chart_intervals:
 
-            data_points = int(chart_intervals[interval]["value"] / extract_interval)
+            data_points = chart_intervals[interval]["value"] // extract_interval
 
             # If data is not available yet after restart for interval, stop here.
             if data_points >= asset_length:
@@ -229,7 +229,7 @@ class BinancePumpAndDumpAlerter:
             for interval in chart_intervals:
                 lastInterval = interval
 
-            data_points = int(chart_intervals[lastInterval]["value"] / extract_interval)
+            data_points = chart_intervals[lastInterval]["value"] // extract_interval
 
             for asset in assets:
                 asset["price"] = asset["price"][-1 - data_points :]
@@ -290,8 +290,7 @@ class BinancePumpAndDumpAlerter:
             if (
                 current_time
                 > top_report_intervals[interval]["start"]
-                + top_report_intervals[interval]["value"]
-                + 1
+                + top_report_intervals[interval]["value"] +1
             ):
                 # Update time for new trigger
                 top_report_intervals[interval]["start"] = current_time
@@ -333,6 +332,7 @@ class BinancePumpAndDumpAlerter:
 
         while True:
             start_loop_time = time.time()
+            loop_time = int(start_loop_time)
 
             exchange_assets = self.retrieve_exchange_assets(
                 self.api_url, self.retry_interval
@@ -353,7 +353,7 @@ class BinancePumpAndDumpAlerter:
             self.update_all_monitored_assets_and_send_news_messages(
                 filtered_assets,
                 exchange_assets,
-                start_loop_time,
+                loop_time,
                 self.dump_enabled,
                 self.chart_intervals,
                 self.extract_interval,
@@ -362,7 +362,7 @@ class BinancePumpAndDumpAlerter:
 
             self.check_and_send_top_pump_dump_statistics_report(
                 filtered_assets,
-                start_loop_time,
+                loop_time,
                 self.top_report_intervals,
                 self.top_pump_enabled,
                 self.top_dump_enabled,
@@ -372,7 +372,7 @@ class BinancePumpAndDumpAlerter:
 
             self.initial_time = self.reset_prices_data_when_due(
                 self.initial_time,
-                start_loop_time,
+                loop_time,
                 self.reset_interval,
                 self.extract_interval,
                 filtered_assets,

@@ -125,7 +125,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
             """.format(
             asset["symbol"],
             no_of_alerts,
-            datetime.fromtimestamp(current_time).strftime("%Y-%m-%d-%H:%M:%S"),
+            datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S"),
             message,
         )
 
