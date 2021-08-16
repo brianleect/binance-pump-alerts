@@ -146,6 +146,7 @@ class BinancePumpAndDumpAlerter:
         self,
         monitored_assets,
         exchange_assets,
+        current_time,
         dump_enabled,
         chart_intervals,
         extract_interval,
@@ -165,6 +166,7 @@ class BinancePumpAndDumpAlerter:
                 asset,
                 chart_intervals,
                 outlier_intervals,
+                current_time,
                 dump_enabled,
             )
 
@@ -190,7 +192,7 @@ class BinancePumpAndDumpAlerter:
                 )
                 break
             # Gets change in % from last alert trigger.
-            price_delta = asset["price"][-1] - asset["price"][-1-data_points]
+            price_delta = asset["price"][-1] - asset["price"][-1 - data_points]
             change = price_delta / asset["price"][-1]
             self.logger.debug(
                 "Calculated asset: %s for interval: %s with change: %s",
@@ -230,7 +232,7 @@ class BinancePumpAndDumpAlerter:
             data_points = int(chart_intervals[lastInterval]["value"] / extract_interval)
 
             for asset in assets:
-                asset["price"] = asset["price"][-1-data_points:]
+                asset["price"] = asset["price"][-1 - data_points :]
 
             initial_time = current_time
 
@@ -288,7 +290,8 @@ class BinancePumpAndDumpAlerter:
             if (
                 current_time
                 > top_report_intervals[interval]["start"]
-                + top_report_intervals[interval]["value"] + 1
+                + top_report_intervals[interval]["value"]
+                + 1
             ):
                 # Update time for new trigger
                 top_report_intervals[interval]["start"] = current_time
@@ -350,6 +353,7 @@ class BinancePumpAndDumpAlerter:
             self.update_all_monitored_assets_and_send_news_messages(
                 filtered_assets,
                 exchange_assets,
+                start_loop_time,
                 self.dump_enabled,
                 self.chart_intervals,
                 self.extract_interval,

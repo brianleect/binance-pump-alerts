@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 
 class ReportGenerator:
@@ -60,6 +61,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
         asset,
         chart_intervals,
         outlier_intervals,
+        current_time,
         dump_enabled=True,
     ):
         change_biggest_delta = 0
@@ -116,13 +118,16 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
             return
 
         news_message = """\
-*{0}* | {1} Alert(s)
+*{0}* | {1} Alert(s) | {2}
 
-{2}
+{3}
 Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
             """.format(
-                asset["symbol"], no_of_alerts, message
-            )
+            asset["symbol"],
+            no_of_alerts,
+            datetime.fromtimestamp(current_time).strftime("%Y-%m-%d-%H:%M:%S"),
+            message,
+        )
 
         self.telegram.send_news_message(news_message)
 
