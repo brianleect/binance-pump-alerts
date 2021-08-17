@@ -22,7 +22,7 @@ config = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
 # Define the log format
 bold_seq = "\033[1m"
-log_format = "[%(asctime)s] %(levelname)-8s %(name)-25s %(message)s"
+log_format = "[%(asctime)s] %(processName)-12s %(threadName)-23s %(levelname)-8s %(name)-23s %(message)s"
 color_format = f"{bold_seq} " "%(log_color)s " f"{log_format}"
 
 colorlog.basicConfig(
