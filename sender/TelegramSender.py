@@ -13,7 +13,6 @@ class TelegramSender:
         token,
         chat_id,
         alert_chat_id=0,
-        retry_interval=2,
         bot_emoji="\U0001F916",  # 🤖
         top_emoji="\U0001F3C6",  # 🏆
         news_emoji="\U0001F4F0",  # 📰
@@ -22,7 +21,6 @@ class TelegramSender:
         self.token = token
         self.chat_id = chat_id
         self.alert_chat_id = alert_chat_id
-        self.retry_interval = retry_interval
 
         self.bot_emoji = bot_emoji
         self.top_emoji = top_emoji

@@ -58,7 +58,6 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 1. `debug`: Default is `False`. Please, only enable for debugging purposes. Default logging set to info level.
 1. `resetInterval`: Default `12h`. It clears the array used to store data price points to prevent memory issues.
 1. `priceRetryInterval`: Default `5s`. In the case of get price fail, this is the time delay before re-attempt
-1. `telegramRetryInterval`: Default `2s` # If telegram message fails to send, this is the time delay before re-attempt.
 1. `checkNewListingEnabled`: Default `True`. Enables checking and adding of new listing pairs.
 
 ## Todo

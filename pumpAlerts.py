@@ -49,9 +49,6 @@ def main():
         alert_chat_id=config["telegramAlertChatId"]
         if "telegramAlertChatId" in config and config["telegramAlertChatId"] != 0
         else config["telegramChatId"],
-        retry_interval=ConversionUtils.duration_to_seconds(
-            config["telegramRetryInterval"]
-        ),
         bot_emoji=config["botEmoji"],
         top_emoji=config["topEmoji"],
         news_emoji=config["newsEmoji"],
