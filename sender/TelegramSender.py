@@ -26,7 +26,7 @@ class TelegramSender:
         self.top_emoji = top_emoji
         self.news_emoji = news_emoji
 
-        self.telegram_executor = ThreadPoolExecutor(max_workers=30)
+        self.telegram_executor = ThreadPoolExecutor(max_workers=3)
 
         self.request = Request(con_pool_size=30)
         self.bot = Bot(self.token, request=self.request)
