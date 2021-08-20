@@ -28,7 +28,7 @@ class TelegramSender:
 
         self.telegram_executor = ThreadPoolExecutor(max_workers=3)
 
-        self.request = Request(con_pool_size=30)
+        self.request = Request(con_pool_size=3)
         self.bot = Bot(self.token, request=self.request)
 
         self.logger = logging.getLogger("telegram-sender")
