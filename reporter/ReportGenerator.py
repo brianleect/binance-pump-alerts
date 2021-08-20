@@ -1,5 +1,7 @@
 import logging
 
+from datetime import datetime
+
 
 class ReportGenerator:
     def __init__(
@@ -45,7 +47,8 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
 *New Listings*"
 {0} new pairs found, adding to monitored list."
 
-*Adding Pairs:*\
+*Adding Pairs:*
+\
             """.format(
             len(symbols_to_add)
         )
@@ -60,6 +63,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
         asset,
         chart_intervals,
         outlier_intervals,
+        current_time,
         dump_enabled=True,
     ):
         change_biggest_delta = 0
@@ -91,7 +95,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
             no_of_alerts += 1
 
             if change > 0:
-                message += "{0} *[{1} Interval]* Change: _{2:.3f}%_ | Price: _{3:.10f}_\n".format(
+                message += "{0} *{1} Interval* | Change: _{2:.3f}%_\n".format(
                     self.pump_emoji,
                     interval,
                     change * 100,
@@ -99,7 +103,7 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
                 )
 
             if change < 0 and dump_enabled:
-                message += "{0} *[{1} Interval]* Change: _{2:.3f}%_ | Price: _{3:.10f}_\n".format(
+                message += "{0} *{1} Interval* | Change: _{2:.3f}%_\n".format(
                     self.dump_emoji,
                     interval,
                     change * 100,
@@ -116,13 +120,20 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
             return
 
         news_message = """\
-*{0}* | {1} Alert(s)
+*{0}* | {1} Alert(s) | {2}
 
-{2}
+Price: _{3:.10f}_ | Volume: _{4}_
+
+{5}
 Open in [Binance Spot](https://www.binance.com/en/trade/{0})\
             """.format(
-                asset["symbol"], no_of_alerts, message
-            )
+            asset["symbol"],
+            no_of_alerts,
+            datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S"),
+            asset["price"][-1],
+            0,
+            message,
+        )
 
         self.telegram.send_news_message(news_message)
 

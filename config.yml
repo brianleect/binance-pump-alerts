@@ -81,7 +81,7 @@ botEmoji: ! "\U0001F916" # 🤖
 pumpEmoji: ! "\U0001F7E2" # 🟢 or '\U0001F4C8' 📈 '\U0001F53C'🔼
 dumpEmoji: ! "\U0001F534" # 🔴 or '\U0001F4C9' 📉 '\U0001F53D'🔽
 topEmoji: ! "\U0001F3C6" # 🏆
-newsEmoji: ! "\U0001F4F0" # 📰
+newsEmoji: ! "\U0001F4F0" # 📰 or '\U0001F680' 🚀
 
 # Debug Params (Avoid touching it if there's no issues)
 
@@ -93,7 +93,5 @@ alertSkipThreshold: 0.75
 resetInterval: 6h
 # In the case of get price fail, this is the time delay before re-attempt
 priceRetryInterval: 5s
-# If telegram message fails to send, this is the time delay before re-attempt
-telegramRetryInterval: 30s
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True

@@ -1,0 +1,8 @@
+.env
+.idea
+
+venv
+
+config.dev.yml
+docker-compose.yml
+Readme.md
