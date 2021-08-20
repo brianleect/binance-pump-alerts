@@ -268,7 +268,8 @@ class BinancePumpAndDumpAlerter:
 
         self.logger.debug("Filtered new listings found: %s.", filtered_symbols_to_add)
 
-        self.report_generator.send_new_listings(filtered_symbols_to_add)
+        if len(filtered_symbols_to_add) > 0:
+            self.report_generator.send_new_listings(filtered_symbols_to_add)
 
         return filtered_assets
 
