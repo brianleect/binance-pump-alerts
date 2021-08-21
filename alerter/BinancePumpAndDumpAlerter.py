@@ -16,7 +16,6 @@ class BinancePumpAndDumpAlerter:
         outlier_intervals,
         top_report_intervals,
         extract_interval,
-        retry_interval,
         reset_interval,
         top_pump_enabled,
         top_dump_enabled,
@@ -24,6 +23,7 @@ class BinancePumpAndDumpAlerter:
         no_of_reported_coins,
         dump_enabled,
         check_new_listing_enabled,
+        tpd_round_hour_enabled,
         telegram,
         report_generator,
     ):
@@ -32,7 +32,6 @@ class BinancePumpAndDumpAlerter:
         self.pairs_of_interest = pairs_of_interest
         self.outlier_intervals = outlier_intervals
         self.extract_interval = extract_interval
-        self.retry_interval = retry_interval
         self.reset_interval = reset_interval
         self.top_pump_enabled = top_pump_enabled
         self.top_dump_enabled = top_dump_enabled
@@ -43,7 +42,13 @@ class BinancePumpAndDumpAlerter:
         self.telegram = telegram
         self.report_generator = report_generator
 
+        self.logger = logging.getLogger("pump-and-dump-alerter")
+
         self.initial_time = int(time.time())
+        tpd_nearest_hour = self.initial_time - (self.initial_time % 3600) + 3600
+        self.logger.info(
+            "Nearest hour is %i seconds away", tpd_nearest_hour - self.initial_time
+        )
 
         self.chart_intervals = {}
         for interval in chart_intervals:
@@ -55,12 +60,16 @@ class BinancePumpAndDumpAlerter:
         self.top_report_intervals = {}
         for interval in top_report_intervals:
             self.top_report_intervals[interval] = {}
-            self.top_report_intervals[interval]["start"] = self.initial_time
+
+            # Determine initial start time for TPD. Should conveniently solve original 0% issue together.
+            if tpd_round_hour_enabled:
+                self.top_report_intervals[interval]["start"] = tpd_nearest_hour
+            else:
+                self.top_report_intervals[interval]["start"] = self.initial_time
+
             self.top_report_intervals[interval][
                 "value"
             ] = ConversionUtils.duration_to_seconds(interval)
-
-        self.logger = logging.getLogger("pump-and-dump-alerter")
 
     @staticmethod
     def extract_ticker_data(symbol, assets):

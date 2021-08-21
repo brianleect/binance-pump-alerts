@@ -12,7 +12,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 config_file = "config.yml"
 
 # Using dev config while development
-config_dev_file = "config.dev.yml"
+config_dev_file = "config.yml"
 if os.path.isfile(config_dev_file):
     config_file = config_dev_file
 
@@ -69,9 +69,6 @@ def main():
         outlier_intervals=config["outlierIntervals"],
         top_report_intervals=config["topReportIntervals"],
         extract_interval=ConversionUtils.duration_to_seconds(config["extractInterval"]),
-        retry_interval=ConversionUtils.duration_to_seconds(
-            config["priceRetryInterval"]
-        ),
         reset_interval=ConversionUtils.duration_to_seconds(config["resetInterval"]),
         top_pump_enabled=config["topPumpEnabled"],
         top_dump_enabled=config["topDumpEnabled"],
@@ -79,6 +76,7 @@ def main():
         no_of_reported_coins=config["noOfReportedCoins"],
         dump_enabled=config["dumpEnabled"],
         check_new_listing_enabled=config["checkNewListingEnabled"],
+        tpd_round_hour_enabled=config["tpdNearestHour"],
         telegram=telegram,
         report_generator=reporter,
     )
