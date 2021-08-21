@@ -69,6 +69,9 @@ def main():
         outlier_intervals=config["outlierIntervals"],
         top_report_intervals=config["topReportIntervals"],
         extract_interval=ConversionUtils.duration_to_seconds(config["extractInterval"]),
+        retry_interval=ConversionUtils.duration_to_seconds(
+            config["priceRetryInterval"]
+        ),
         reset_interval=ConversionUtils.duration_to_seconds(config["resetInterval"]),
         top_pump_enabled=config["topPumpEnabled"],
         top_dump_enabled=config["topDumpEnabled"],

@@ -16,6 +16,7 @@ class BinancePumpAndDumpAlerter:
         outlier_intervals,
         top_report_intervals,
         extract_interval,
+        retry_interval,
         reset_interval,
         top_pump_enabled,
         top_dump_enabled,
@@ -32,6 +33,7 @@ class BinancePumpAndDumpAlerter:
         self.pairs_of_interest = pairs_of_interest
         self.outlier_intervals = outlier_intervals
         self.extract_interval = extract_interval
+        self.retry_interval = retry_interval
         self.reset_interval = reset_interval
         self.top_pump_enabled = top_pump_enabled
         self.top_dump_enabled = top_dump_enabled
