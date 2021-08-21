@@ -12,7 +12,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 config_file = "config.yml"
 
 # Using dev config while development
-config_dev_file = "config.yml"
+config_dev_file = "config.dev.yml"
 if os.path.isfile(config_dev_file):
     config_file = config_dev_file
 
