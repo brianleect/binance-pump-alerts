@@ -47,12 +47,12 @@ Open in [Binance Spot](https://www.binance.com/en/trade/{1})\
 *New Listings*"
 {0} new pairs found, adding to monitored list."
 
-*Adding Pairs:*
-\
+*Adding Pairs:*\
             """.format(
             len(symbols_to_add)
         )
 
+        message = "\n"
         for symbol in symbols_to_add:
             message += "- _{0}_\n".format(symbol)
 
