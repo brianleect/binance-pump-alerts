@@ -72,6 +72,9 @@ process_config() {
     if [[ -n $CHECK_NEW_LISTING_ENABLED ]]; then
         sed -i "s/checkNewListingEnabled.*/checkNewListingEnabled: ${CHECK_NEW_LISTING_ENABLED}/" config.yml
     fi
+    if [[ -n $TPD_NEAREST_HOUR ]]; then
+        sed -i "s/tpdNearestHour.*/tpdNearestHour: ${TPD_NEAREST_HOUR}/" config.yml
+    fi
 }
 
 # Adding parameters set from the environment variables to the config yaml file.
