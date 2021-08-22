@@ -24,7 +24,7 @@ class BinancePumpAndDumpAlerter:
         no_of_reported_coins,
         dump_enabled,
         check_new_listing_enabled,
-        tpd_round_hour_enabled,
+        top_report_nearest_hour,
         telegram,
         report_generator,
     ):
@@ -64,7 +64,7 @@ class BinancePumpAndDumpAlerter:
             self.top_report_intervals[interval] = {}
 
             # Determine initial start time for TPD. Should conveniently solve original 0% issue together.
-            if tpd_round_hour_enabled:
+            if top_report_nearest_hour:
                 self.top_report_intervals[interval]["start"] = tpd_nearest_hour
             else:
                 self.top_report_intervals[interval]["start"] = self.initial_time
