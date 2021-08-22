@@ -44,4 +44,6 @@ USER bpauser
 
 COPY --chown=bpauser:bpauser . /binance-pump-alerts/
 
+RUN chmod a+x entrypoint.sh
+
 ENTRYPOINT ["./entrypoint.sh", "python", "pumpAlerts.py"]
