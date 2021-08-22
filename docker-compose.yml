@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: "./Dockerfile"
-    image: binance-pump-alerts
+    image: patbaumgartner/binance-pump-alerts:latest
     # image: brianleect/binance-pump-alerts:latest
     restart: "no"
     environment:
