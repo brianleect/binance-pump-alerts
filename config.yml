@@ -96,4 +96,4 @@ priceRetryInterval: 5s
 # Disables checking and adding of new listing pairs
 checkNewListingEnabled: True
 # Disables rounding to nearest hour for first TPD if false
-tpdNearestHour: True
+topReportNearestHour: True

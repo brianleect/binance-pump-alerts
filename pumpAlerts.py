@@ -79,7 +79,7 @@ def main():
         no_of_reported_coins=config["noOfReportedCoins"],
         dump_enabled=config["dumpEnabled"],
         check_new_listing_enabled=config["checkNewListingEnabled"],
-        tpd_round_hour_enabled=config["tpdNearestHour"],
+        tpd_round_hour_enabled=config["topReportNearestHour"],
         telegram=telegram,
         report_generator=reporter,
     )
