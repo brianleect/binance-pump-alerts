@@ -2,7 +2,7 @@
 
 BPA is a simple application which gets the price data from Binance Spot or Futures API and sends Telegram messages based on parameters set used to detect pumps and dumps on the Binance Exchange.
 
-[Demo Telegram Channel](https://t.me/binance_pump_alerts) hosted on AWS ec2 running the latest version 24/7.
+[Demo Telegram Channel](https://t.me/binance_pump_alerts) hosted on AWS ec2 running the 'Base Stable Version' release 24/7.
 
 ![image](https://user-images.githubusercontent.com/63389110/128601355-4be90b36-5e54-4be6-bf85-00fc395645de.png)
 

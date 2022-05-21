@@ -49,9 +49,9 @@ class BinancePumpAndDumpAlerter:
         self.logger = logging.getLogger("pump-and-dump-alerter")
 
         self.initial_time = int(time.time())
-        tpd_nearest_hour = self.initial_time - (self.initial_time % 3600) + 3600
+        nearest_hour = self.initial_time - (self.initial_time % 3600) + 3600
         self.logger.info(
-            "Nearest hour is %i seconds away", tpd_nearest_hour - self.initial_time
+            "Nearest hour is %i seconds away", nearest_hour - self.initial_time
         )
 
         self.chart_intervals = {}
@@ -67,7 +67,7 @@ class BinancePumpAndDumpAlerter:
 
             # Determine initial start time for TPD. Should conveniently solve original 0% issue together.
             if top_report_nearest_hour:
-                self.top_report_intervals[interval]["start"] = tpd_nearest_hour
+                self.top_report_intervals[interval]["start"] = nearest_hour
             else:
                 self.top_report_intervals[interval]["start"] = self.initial_time
 
