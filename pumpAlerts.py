@@ -64,6 +64,7 @@ def main():
     alerter = BinancePumpAndDumpAlerter(
         api_url=config["apiUrl"],
         watchlist=[] if "watchlist" not in config else config["watchlist"],
+        blacklist=[] if "blacklist" not in config else config["blacklist"],
         pairs_of_interest=config["pairsOfInterest"],
         chart_intervals=config["chartIntervals"],
         outlier_intervals=config["outlierIntervals"],

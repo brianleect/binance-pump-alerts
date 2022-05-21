@@ -11,6 +11,7 @@ class BinancePumpAndDumpAlerter:
         self,
         api_url,
         watchlist,
+        blacklist,
         pairs_of_interest,
         chart_intervals,
         outlier_intervals,
@@ -30,6 +31,7 @@ class BinancePumpAndDumpAlerter:
     ):
         self.api_url = api_url
         self.watchlist = watchlist
+        self.blacklist = blacklist
         self.pairs_of_interest = pairs_of_interest
         self.outlier_intervals = outlier_intervals
         self.extract_interval = extract_interval
@@ -104,13 +106,20 @@ class BinancePumpAndDumpAlerter:
                 exc_info=True,
             )
 
-    def is_symbol_valid(self, symbol, watchlist, pairs_of_interest):
+    def is_symbol_valid(self, symbol, watchlist, blacklist, pairs_of_interest):
         # Filter symbols in watchlist if set - This disables the pairsOfInterest feature
         if len(watchlist) > 0:
             if symbol not in watchlist:
                 self.logger.debug("Ignoring symbol not in watchlist: %s.", symbol)
                 return False
             return True
+
+        # Filter symbols in blacklist if set - This DOES NOT IMPACT the pairsOfInterest feature
+        if len(blacklist) > 0:
+            if symbol in blacklist:
+                self.logger.info(
+                    "Ignoring symbol found in blacklist: %s.", symbol)
+                return False
 
         # Filter pairsOfInterest to reduce the noise. E.g. BUSD, USDT, ETH, BTC
         is_in_pairs_of_interest = False
@@ -138,14 +147,14 @@ class BinancePumpAndDumpAlerter:
         return True
 
     def filter_and_convert_assets(
-        self, exchange_assets, watchlist, pairs_of_interest, chart_intervals
+        self, exchange_assets, watchlist, blacklist, pairs_of_interest, chart_intervals
     ):
         filtered_assets = []
 
         for exchange_asset in exchange_assets:
             symbol = exchange_asset["symbol"]
 
-            if self.is_symbol_valid(symbol, watchlist, pairs_of_interest):
+            if self.is_symbol_valid(symbol, watchlist, blacklist, pairs_of_interest):
                 filtered_assets.append(self.create_new_asset(symbol, chart_intervals))
                 self.logger.info("Adding symbol: %s.", symbol)
 
@@ -253,6 +262,7 @@ class BinancePumpAndDumpAlerter:
         filtered_assets,
         exchange_assets,
         watchlist,
+        blacklist,
         pairs_of_interest,
         chart_intervals,
     ):
@@ -273,7 +283,7 @@ class BinancePumpAndDumpAlerter:
 
         filtered_symbols_to_add = []
         for symbol in retrieved_symbols_to_add:
-            if self.is_symbol_valid(symbol, watchlist, pairs_of_interest):
+            if self.is_symbol_valid(symbol, watchlist, blacklist, pairs_of_interest):
                 filtered_symbols_to_add.append(symbol)
                 filtered_assets.append(self.create_new_asset(symbol, chart_intervals))
 
@@ -326,6 +336,7 @@ class BinancePumpAndDumpAlerter:
         filtered_assets = self.filter_and_convert_assets(
             initial_assets,
             self.watchlist,
+            self.blacklist,
             self.pairs_of_interest,
             self.chart_intervals,
         )
@@ -351,6 +362,7 @@ class BinancePumpAndDumpAlerter:
                     filtered_assets,
                     exchange_assets,
                     self.watchlist,
+                    self.blacklist,
                     self.pairs_of_interest,
                     self.chart_intervals,
                 )

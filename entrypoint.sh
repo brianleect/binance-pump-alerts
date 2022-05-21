@@ -4,7 +4,7 @@ set -e
 process_config() {
 
     # Please mount your own config file into the container for unsupported env parameters!
-    # Currently not supported config parameters: chartIntervals, outlierIntervals, pairsOfInterest, watchlist, topReportIntervals
+    # Currently not supported config parameters: chartIntervals, outlierIntervals, pairsOfInterest, watchlist, blacklist, topReportIntervals
 
     if [[ -n $API_URL ]]; then
         sed -i "s/apiUrl.*/apiUrl: ${API_URL}/" config.yml
