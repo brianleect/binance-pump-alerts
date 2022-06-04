@@ -12,7 +12,7 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 1. Create a new telegram bot token from [@botfather](https://t.me/BotFather).
 1. Get telegram `chat_id` from [@get_id_bot](https://telegram.me/get_id_bot).
    - Alternatively, a `channel_id` can be used as well.
-1. Add pairs to watch into the watchlist or leave it empty to monitor all tickers on Binance.
+1. Add pairs to watch into the watchlist or to ignore in blacklist or leave it empty to monitor all tickers on Binance.
 1. Run the script with the command `python pumpAlerts.py`.
 
 ## Docker Setup
@@ -41,7 +41,8 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 
 ### Optional features to enable
 
-1. `watchlist`: Default if left empty it'll look at ALL symbols after filtering by pairs of interest. If pairs are added to the watchlist, the application will _only track the pairs specified_.
+1. `watchlist`: Default if left empty it'll look at ALL symbols after filtering by pairs of interest. If pairs are added to the watchlist, the application will _only TRACK the pairs specified_. pairsOfInterest will be ignored.
+1. `blacklist`: Default if left empty it'll look at ALL symbols after filtering by pairs of interest. If pairs are added to the blacklist, the application will ignore pairs specified. pairs of Interest will NOT be impacted.
 1. `dumpEnabled`: If `True`, the application will alert on dumps as well.
 
 #### Top Pump & Dump Params
@@ -82,3 +83,4 @@ BPA is a simple application which gets the price data from Binance Spot or Futur
 1. Docker integration (Thanks to [@patbaumgartner](https://github.com/patbaumgartner))
 1. Logging integration (Thanks to [@patbaumgartner](https://github.com/patbaumgartner))
 1. Major Refactoring and cleanup (Thanks to [@patbaumgartner](https://github.com/patbaumgartner))
+1. Blacklist feature

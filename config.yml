@@ -52,6 +52,11 @@ extractInterval: 1s
 #  - ADAUSDT
 #  - ETHUSDT
 
+# Blacklist only mode, if enabled, pairs in blacklist will be IGNORED it DOES NOT IMPACT pairsOfInterest
+#blacklist:
+#  - BTCUSDT
+#  - ETHUSDT
+
 # List the trading currency you are interested in. Other options include 'BUSD', 'BTC' , 'ETH'
 pairsOfInterest:
   - USDT
