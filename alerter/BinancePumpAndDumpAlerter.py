@@ -105,6 +105,8 @@ class BinancePumpAndDumpAlerter:
                 e,
                 exc_info=True,
             )
+            sleep(5)  # Sleep 5s and try again
+            return self.retrieve_exchange_assets(api_url)
 
     def is_symbol_valid(self, symbol, watchlist, blacklist, pairs_of_interest):
         # Filter symbols in watchlist if set - This disables the pairsOfInterest feature
