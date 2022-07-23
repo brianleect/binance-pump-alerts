@@ -315,8 +315,9 @@ class BinancePumpAndDumpAlerter:
                 + top_report_intervals[interval]["value"]
                 + 1
             ):
-                # Update time for new trigger
-                top_report_intervals[interval]["start"] = current_time
+            
+                # Update time for new trigger, rounded down to nearest interval. Avoid delay over time.
+                top_report_intervals[interval]["start"] = current_time - (current_time % ConversionUtils.duration_to_seconds(interval)) + ConversionUtils.duration_to_seconds(interval)
 
                 self.logger.debug(
                     "Sending out top pump dump report. Interval: %s.", interval
