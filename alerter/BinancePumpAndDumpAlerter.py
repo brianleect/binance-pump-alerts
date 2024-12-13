@@ -199,10 +199,9 @@ class BinancePumpAndDumpAlerter:
         asset_length = len(asset["price"])
 
         for interval in chart_intervals:
-
             data_points = chart_intervals[interval]["value"] // extract_interval
 
-            # If data is not available yet after restart for interval, stop here.
+            # If data is not enough yet after restart for interval, stop here.
             if data_points >= asset_length:
                 self.logger.debug(
                     "Not enough datapoints (%s/%s) for interval: %s",
@@ -211,9 +210,19 @@ class BinancePumpAndDumpAlerter:
                     interval,
                 )
                 break
+
             # Gets change in % from last alert trigger.
-            price_delta = asset["price"][-1] - asset["price"][-1 - data_points]
-            change = price_delta / asset["price"][-1]
+            current_price = asset["price"][-1]
+            if current_price == 0:
+                self.logger.warning(
+                    "Received zero price for asset %s, skipping calculation",
+                    asset["symbol"]
+                )
+                change = 0
+            else:
+                price_delta = current_price - asset["price"][-1 - data_points]
+                change = price_delta / current_price
+
             self.logger.debug(
                 "Calculated asset: %s for interval: %s with change: %s",
                 asset["symbol"],
